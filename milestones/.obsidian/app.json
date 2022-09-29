@@ -1,0 +1,11 @@
+{
+  "showLineNumber": true,
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "assets",
+  "pdfExportSettings": {
+    "pageSize": "A4",
+    "landscape": false,
+    "margin": "0",
+    "downscalePercent": 80
+  }
+}
