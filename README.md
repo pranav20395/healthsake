@@ -14,6 +14,10 @@
 
 3.  Open new terminal within Visual Studio Code
 
+## Editing Report
+
+1.  Open milestones with obsidian
+
 ## Setting up TailwindCSS
 
 1.  Install dependencies
