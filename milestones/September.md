@@ -5,9 +5,9 @@ This milestone is worth 2.5% of weightage. The 25 marks of this deadline will be
 [X]  Install and configure the web server along with SSL/TLS certificates.
 [X]  Host any sample HTTPS website on the VM provided.  
 
-[ ] One member of each team is required to submit a report having screenshots for each of the steps required for the setup, showing all the commands executed and their outcomes.  
+[X] One member of each team is required to submit a report having screenshots for each of the steps required for the setup, showing all the commands executed and their outcomes.  
   
-[ ] Submission filename example: Team0_September.pdf
+[X] Submission filename example: Team0_September.pdf
 ---
 
 # September Milestone Report
