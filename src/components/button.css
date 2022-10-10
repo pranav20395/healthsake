@@ -1,5 +1,0 @@
-@layer components {
-    .button {
-        @apply bg-red-500 rounded-md p-2 px-3 text-white font-bold font-mono;
-    }
-}

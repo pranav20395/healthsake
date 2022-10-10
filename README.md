@@ -1,35 +1,44 @@
-# FCSAKE
+# HealthSake(maybe)
 
-## Getting Started
+This is the code base of HealthSake, an interactive Patient Data Management System
+developed primarily to facilitate the verification of the patients’ documents while buying medicines or making medical claims.
 
-1.  Clone the repository
+## Table of contents
 
-         https://github.com/JaideepGuntupalli/ {{ your project name }}
+- [HealthSake(maybe)](#healthsakemaybe)
+  - [Table of contents](#table-of-contents)
+  - [Overview](#overview)
+    - [What is the project?](#what-is-the-project)
+    - [What is the MVP (Minimal Viable Product)?](#what-is-the-mvp-minimal-viable-product)
 
-    Alternately you can download the zip file and unzip it.
+## Overview
 
-2.  You will now have the cloned project folder. Open the project in
-    Visual Studio Code editor (recommended code editor for Tailwind CSS
-    Projects)
+### What is the project?
 
-3.  Open new terminal within Visual Studio Code
+A patient data management system is a software system developed primarily to facilitate the verification of the patients’ documents while buying medicines or making medical claims. The focus of this project is to develop a portal that facilitates the secure exchange and verification of electronic health records.
 
-## Editing Report
+### What is the MVP (Minimal Viable Product)?
 
-1.  Open milestones with obsidian
+Document Verification System: The patients will provide the documents to the healthcare professionals or organizations, which need to verify automatically.
 
-## Setting up TailwindCSS
+You can have the following types of verification in the system.
 
-1.  Install dependencies
+-   The patients issue verifiable documents and share them with healthcare professionals and organizations.
+-   The healthcare professionals issue verifiable documents and share them with the patients.
+-   Healthcare organizations issue verifiable documents and share them with the patients.
 
-        yarn install
+Digital signatures and blockchain is used to share & verify the documents.
 
-2.  Build using Tailwind CSS in dev
+Some other features
 
-        yarn run dev
-
-3.  Build using Tailwind CSS for Production
-
-        yarn run prod
-
-NOTE: Do NOT edit the file `public > styles.css` directly - This is the distribution stylesheet. The CSS here is generated from `src > styles.css` using Tailwind when you build.
+-   Mechanism to search professionals & organizations using type, name, & location.
+-   Creation and maintenance of various organizations’ lists.
+-   Ability to set/edit settings.
+-   Ability to delete their own medical records.
+-   An e-cash wallet (or a payment gateway) for performing financial transactions.
+-   Maintenance of profile information of the user/organization.
+-   Ability to buy medicines and get medical claims.
+-   Ability to provide documents to other users (patients/organizations).
+-   Ability to automatically verify the documents.
+-   Admin capabilities as mentioned above or more.
+-   User-Admin approval process using a document upload.
