@@ -6,7 +6,7 @@ import Layout from "./client/Layout";
 function App() {
     return (
         <Layout>
-            <div className=" w-screen">Hi mom</div>
+            <div className=" w-screen">Hi</div>
         </Layout>
     );
 }

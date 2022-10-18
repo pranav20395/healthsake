@@ -16,37 +16,37 @@ const SideBar: FC = () => {
             <div className="flex flex-col gap-4 w-5/6">
                 <SideBarLink
                     href="/dashboard"
-                    icon={<img src={dashboard} className="h-6" />}
+                    icon={<img src={dashboard} className="h-6" alt="icon"/>}
                 >
                     Dashboard
                 </SideBarLink>
                 <SideBarLink
                     href="/user"
-                    icon={<img src={user} className="h-6" />}
+                    icon={<img src={user} className="h-6" alt="icon"/>}
                 >
                     My Profile
                 </SideBarLink>
                 <SideBarLink
                     href="/medicine"
-                    icon={<img src={medicine} className="h-6" />}
+                    icon={<img src={medicine} className="h-6" alt="icon"/>}
                 >
                     Prescriptions
                 </SideBarLink>
                 <SideBarLink
                     href="/calendar"
-                    icon={<img src={calendar} className="h-6" />}
+                    icon={<img src={calendar} className="h-6" alt="icon"/>}
                 >
                     Appointments
                 </SideBarLink>
                 <SideBarLink
                     href="/question"
-                    icon={<img src={question} className="h-6" />}
+                    icon={<img src={question} className="h-6" alt="icon"/>}
                 >
                     Help
                 </SideBarLink>
                 <SideBarLink
-                    href="/signout"
-                    icon={<img src={signout} className="h-6" />}
+                    href="/sign-out"
+                    icon={<img src={signout} className="h-6" alt="icon"/>}
                 >
                     Logout
                 </SideBarLink>
