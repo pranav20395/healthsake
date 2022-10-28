@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  dev-db:
+    image: postgres:13
+    container_name: dev-db
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: devdmin
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: fcsake
+    networks:
+      - dev-network
+networks:
+  dev-network:
