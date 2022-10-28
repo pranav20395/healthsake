@@ -50,25 +50,25 @@ Some other features
 
 ## Understanding File Structure:
 
-.
-├── prisma # <-- prisma is added
-│ ├── migrations # <-- consists all changes made to the database
-│ │ └── [...]
-│ └── schema.prisma # <-- database schema
-├── src
-│ ├── pages
-│ │ ├── _app.tsx # <-- Next.js App
-│ │ ├── api
-│ │ │ └── trpc
-│ │ │ └── [trpc].ts # <-- tRPC HTTP handler
-│ │ └── [..]
-│ ├── server
-│ │ ├── routers
-│ │ │ ├── _app.ts # <-- main app router
-│ │ │ ├── post.ts # <-- sub routers
-│ │ │ └── [..]
-│ │ ├── context.ts # <-- create app context
-│ │ └── trpc.ts # <-- procedure helpers
-│ └── utils
-│ └── trpc.ts # <-- typesafe tRPC hooks
-└── [..]
+    .
+    ├── prisma # <-- prisma is added
+    │ ├── migrations # <-- consists all changes made to the database
+    │ │ └── [...]
+    │ └── schema.prisma # <-- database schema
+    ├── src
+    │ ├── pages
+    │ │ ├── _app.tsx # <-- Next.js App
+    │ │ ├── api
+    │ │ │ └── trpc
+    │ │ │ └── [trpc].ts # <-- tRPC HTTP handler
+    │ │ └── [..]
+    │ ├── server
+    │ │ ├── routers
+    │ │ │ ├── _app.ts # <-- main app router
+    │ │ │ ├── post.ts # <-- sub routers
+    │ │ │ └── [..]
+    │ │ ├── context.ts # <-- create app context
+    │ │ └── trpc.ts # <-- procedure helpers
+    │ └── utils
+    │ └── trpc.ts # <-- typesafe tRPC hooks
+    └── [..]
