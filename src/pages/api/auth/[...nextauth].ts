@@ -10,18 +10,17 @@ export const authOptions: NextAuthOptions = {
         Credentials({
             name: "credentials",
             credentials: {
-                email: {
-                    label: "Email",
-                    type: "email",
-                    placeholder: "jsmith@gmail.com",
-                },
+                email: {label: "Email", type: "email"},
                 password: {label: "Password", type: "password"},
+                type: {label: "Type", type: "enum", options: ["INDIVIDUAL", "ORGANISATION"]},
             },
             authorize: async (credentials, request) => {
                 const creds = await loginSchema.parseAsync(credentials);
 
-                const user = await prisma.user.findFirst({
-                    where: {email: creds.email},
+                const user = await prisma.user.findUnique({
+                    where: {
+                        email: creds.email,
+                    },
                 });
 
                 if (!user) {
@@ -33,13 +32,47 @@ export const authOptions: NextAuthOptions = {
                 if (!isValidPassword) {
                     return null;
                 }
-                const name = user.fname + " " + user.lname;
+
+                console.log(user);
 
                 return {
                     id: user.id,
                     email: user.email,
-                    name,
+                    name: user.name,
                 };
+
+                // const user = await prisma.user.findFirst({
+                //     where: {email: creds.email},
+                // });
+                //
+                // if (!user) {
+                //     return null;
+                // }
+                //
+                // const isValidPassword = await verify(user.password, creds.password);
+                //
+                // if (!isValidPassword) {
+                //     return null;
+                // }
+                //
+                // if(creds.type === "INDIVIDUAL"){
+                //     const individual = await prisma.individual.findFirst({
+                //         where: {id: user.indID},
+                //     });
+                //     const name = individual.fname + " " + individual.lname;
+                // } else {
+                //     const organisation = await prisma.organisation.findFirst({
+                //         where: {id: user.orgID},
+                //     });
+                //     const name = organisation.name;
+                // }
+                //
+                // return {
+                //     id: user.id,
+                //     name: name,
+                //     email: user.email,
+                //     type: creds.type,
+                // }
             },
         }),
     ],

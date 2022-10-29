@@ -48,15 +48,41 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  fname         String?
-  lname         String?
-  email         String?   @unique
-  emailVerified DateTime?
-  password      String
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  userVerified Boolean       @default(false)
+  type         String        @default("INDIVIDUAL")
+  indID        String?
+  individual   Individual?   @relation(fields: [indID], references: [id])
+  orgId        String?
+  organisation Organisation? @relation(fields: [orgId], references: [id])
+  accounts     Account[]
+  sessions     Session[]
+}
+
+model Individual {
+  id            String  @id @default(cuid())
   image         String?
-  accounts      Account[]
-  sessions      Session[]
+  identity      String?
+  address       String?
+  healthLicense String?
+  role          String  @default("USER")
+  User          User[]
+}
+
+model Organisation {
+  id          String  @id @default(cuid())
+  description String
+  image1      String?
+  image2      String?
+  license     String?
+  permit      String?
+  location    String?
+  phone       String?
+  role        String  @default("HOSPITAL")
+  User        User[]
 }
 
 model VerificationToken {
@@ -65,4 +91,11 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model OneTimeToken {
+  id      String   @id @default(cuid())
+  email   String
+  otp     String
+  expires DateTime @default(dbgenerated("NOW() + interval '2 minutes'")) // 2 minutes expiry time
 }
