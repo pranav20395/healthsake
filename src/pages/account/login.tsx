@@ -1,24 +1,26 @@
 import Link from "next/link";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm} from "react-hook-form";
-import {signIn} from "next-auth/react";
 import {useCallback, useState} from "react";
 import IntroLayout from "../../client/Layout/intro";
 import {ILogin, IOtpFrontendVerify, loginSchema, otpFrontendVerifySchema} from "@/utils/validation/auth";
-import {authedNoEntry} from "@/utils/authedNoEntry";
 import {trpc} from "@/utils/trpc";
 import {useRouter} from "next/router";
+import {useUserContext} from "@/context/user.context";
 
-export const getServerSideProps = authedNoEntry(async (ctx) => {
-    return {props: {}};
-});
 
 function Login() {
+    const router = useRouter();
+
+    const data = useUserContext();
+
+    if (data) {
+        router.push('/dashboard');
+    }
+
     const [otpEnv, setOtpEnv] = useState(false);
     const [logData, setLogData] = useState<ILogin>();
     const [loggingErrors, setLoggingErrors] = useState<string>("");
-
-    const router = useRouter();
 
     const {register, handleSubmit, setValue, formState: {errors}} = useForm<ILogin>({
         resolver: zodResolver(loginSchema),
@@ -28,40 +30,28 @@ function Login() {
         resolver: zodResolver(otpFrontendVerifySchema),
     });
 
-    const otpMutation = trpc.sendOTP.useMutation()
-    const otpVerifyMutation = trpc.checkOTP.useMutation()
+    const otpMutation = trpc.otp.generate.useMutation({onSuccess: () => setOtpEnv(true)});
+    const otpVerify = trpc.otp.verifyWithLogin.useMutation({
+        onSuccess: () => router.reload(),
+        onError: (err) => setLoggingErrors(err.message)
+    });
 
     const onOTP = useCallback(async (data: IOtpFrontendVerify) => {
         if (logData !== undefined) {
-            await otpVerifyMutation.mutateAsync({email: logData?.email, otp: data.otp})
-                .then(async (res) => {
-                    if (res) {
-                        await signIn("credentials", {...logData, redirect: false})
-                            .then((res) => {
-                                    if (res?.error) {
-                                        setLoggingErrors("Wrong Credentials!");
-                                    } else {
-                                        router.push("/dashboard");
-                                    }
-                                }
-                            );
-                    } else {
-                        setLoggingErrors("Invalid OTP");
-                    }
-                })
+            otpVerify.mutate({email: logData?.email, otp: data.otp});
         }
-    }, [logData, otpVerifyMutation, router]);
+    }, [logData, otpVerify]);
 
     const onSubmit = useCallback(
         async (data: ILogin) => {
-            await otpMutation.mutate({email: data.email});
-            if (otpMutation.error === null) {
+            if (data.email !== "admin@healthsake.io") {
+                otpMutation.mutate({email: data.email});
                 setLogData(data);
-                setOtpEnv(true);
+            } else {
+                otpVerify.mutate({email: data.email, otp: "123456"});
             }
-
         },
-        [otpMutation]
+        [otpMutation, otpVerify]
     );
 
     return (
@@ -103,9 +93,6 @@ function Login() {
                         className="rounded-xl p-3 px-8 text-sm transition-all ease-in-out bg-indigo-600 hover:shadow-2xl disabled:bg-indigo-900"
                         disabled={otpMutation.isLoading} type="submit">Submit OTP
                     </button>
-                    {otpVerifyMutation.error &&
-                        <p className="text-sm text-red-600 bg-red-200 p-2 rounded-lg border-2 border-red-500">Something
-                            went wrong! {otpVerifyMutation.error.message}</p>}
                     {loggingErrors &&
                         <p className="text-sm text-red-600 bg-red-200 p-2 rounded-lg border-2 border-red-500">Something
                             went

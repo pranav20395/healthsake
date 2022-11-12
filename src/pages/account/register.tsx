@@ -8,18 +8,21 @@ import {useRouter} from "next/router";
 import IntroLayout from "../../client/Layout/intro";
 import {IOtpFrontendVerify, ISignUp, otpFrontendVerifySchema, signUpSchema} from "@/utils/validation/auth";
 import {trpc} from "@/utils/trpc";
-import {authedNoEntry} from "@/utils/authedNoEntry";
-
-export const getServerSideProps = authedNoEntry(async (ctx) => {
-    return {props: {}};
-});
+import {useUserContext} from "@/context/user.context";
 
 const Register: NextPage = () => {
+    const router = useRouter();
+
+    const data = useUserContext();
+
+    if (data) {
+        router.push('/dashboard');
+    }
+
     const [otpEnv, setOtpEnv] = useState(false);
     const [regData, setRegData] = useState<ISignUp>();
     const [loggingErrors, setLoggingErrors] = useState<string>("");
 
-    const router = useRouter();
     const {register, handleSubmit, formState: {errors}} = useForm<ISignUp>({
         resolver: zodResolver(signUpSchema),
     });
@@ -28,39 +31,24 @@ const Register: NextPage = () => {
         resolver: zodResolver(otpFrontendVerifySchema),
     });
 
-    const otpMutation = trpc.sendOTP.useMutation()
-    const otpVerifyMutation = trpc.checkOTP.useMutation()
-    const mutation = trpc.userSignUp.useMutation()
+    const otpMutation = trpc.otp.generate.useMutation({onSuccess: () => setOtpEnv(true)});
+    const otpVerify = trpc.otp.verify.useMutation();
+    const regUserMutation = trpc.user.registerUser.useMutation({onSuccess: () => router.push("/account/login")});
 
     const onOTP = useCallback(
         async (data: IOtpFrontendVerify) => {
             if (regData !== undefined) {
-                try {
-                    await otpVerifyMutation.mutateAsync({email: regData?.email, otp: data.otp})
-                    try {
-                        await mutation.mutate(regData)
-                        await router.push("/account/login");
-                    } catch (cause) {
-                        console.log(cause)
-                    }
-
-                } catch (cause) {
-                    console.log(cause)
-                }
+                otpVerify.mutate({email: regData?.email, otp: data.otp});
+                regUserMutation.mutate(regData);
             }
         },
-        [regData, otpVerifyMutation, mutation, router]
+        [otpVerify, regData, regUserMutation]
     );
 
     const onSubmit = useCallback(
         async (data: ISignUp) => {
-            try {
-                await otpMutation.mutate({email: data.email});
-                setRegData(data);
-                setOtpEnv(true);
-            } catch (cause) {
-                console.log(cause)
-            }
+            otpMutation.mutate({email: data.email});
+            setRegData(data);
         },
         [otpMutation]
     );
@@ -93,11 +81,14 @@ const Register: NextPage = () => {
                     </label>
                     <button
                         className="rounded-xl p-3 px-8 text-sm transition-all ease-in-out bg-indigo-600 hover:shadow-2xl disabled:bg-indigo-900"
-                        disabled={mutation.isLoading} type="submit">Register
+                        disabled={otpMutation.isLoading} type="submit">Register
                     </button>
-                    {mutation.error &&
+                    {otpMutation.error &&
                         <p className="text-sm text-red-600 bg-red-200 p-2 rounded-lg border-2 border-red-500">Something went
-                            wrong! {mutation.error.message}</p>}
+                            wrong! {otpMutation.error.message}</p>}
+                    {loggingErrors &&
+                        <p className="text-sm text-red-600 bg-red-200 p-2 rounded-lg border-2 border-red-500">Something went
+                            wrong! {loggingErrors}</p>}
                     <Link href="/account/login"><span className="text-gray-500 text-sm cursor-pointer text-center">Already have an account?</span></Link>
                 </form>) :
                 (<form className="flex flex-col gap-6" onSubmit={hanSubmit(onOTP)}>
@@ -108,11 +99,12 @@ const Register: NextPage = () => {
                     </label>
                     <button
                         className="rounded-xl p-3 px-8 text-sm transition-all ease-in-out bg-indigo-600 hover:shadow-2xl disabled:bg-indigo-900"
-                        disabled={otpMutation.isLoading} type="submit">Submit OTP
+                        disabled={regUserMutation.isLoading} type="submit">Submit OTP
                     </button>
-                    {otpVerifyMutation.error &&
+                    {regUserMutation.error &&
                         <p className="text-sm text-red-600 bg-red-200 p-2 rounded-lg border-2 border-red-500">Something
-                            went wrong! {otpVerifyMutation.error.message}</p>}
+                            went
+                            wrong! {regUserMutation.error.message}</p>}
                     {loggingErrors &&
                         <p className="text-sm text-red-600 bg-red-200 p-2 rounded-lg border-2 border-red-500">Something
                             went

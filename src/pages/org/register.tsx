@@ -4,20 +4,22 @@ import {useForm} from "react-hook-form";
 import {useCallback, useState} from "react";
 
 import IntroLayout from "../../client/Layout/intro";
-import {authedNoEntry} from "@/utils/authedNoEntry";
 import {IOtpFrontendVerify, orgSignUpSchema, OSignUp, otpFrontendVerifySchema} from "@/utils/validation/auth";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {trpc} from "@/utils/trpc";
-
-export const getServerSideProps = authedNoEntry(async (ctx) => {
-    return {props: {}};
-});
+import {useUserContext} from "@/context/user.context";
 
 function Register() {
-    // OTP state
+    const router = useRouter();
+
+    const data = useUserContext();
+
+    if (data) {
+        router.push('/dashboard');
+    }
+
     const [otpEnv, setOtpEnv] = useState(false);
     const [regData, setRegData] = useState<OSignUp>();
-    const router = useRouter();
     const {register, handleSubmit, formState: {errors}} = useForm<OSignUp>({
         resolver: zodResolver(orgSignUpSchema),
     });
@@ -26,9 +28,9 @@ function Register() {
         resolver: zodResolver(otpFrontendVerifySchema),
     });
 
-    const mutation = trpc.orgSignUp.useMutation()
-    const otpMutation = trpc.sendOTP.useMutation()
-    const otpVerifyMutation = trpc.checkOTP.useMutation()
+    const mutation = trpc.user.registerOrg.useMutation()
+    const otpMutation = trpc.otp.generate.useMutation()
+    const otpVerifyMutation = trpc.otp.verify.useMutation()
 
     const onOTP = useCallback(
         async (data: IOtpFrontendVerify) => {

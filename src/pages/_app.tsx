@@ -1,20 +1,18 @@
-// src/pages/_app.tsx
 import "../styles/globals.css";
-import {SessionProvider} from "next-auth/react";
-import type {Session} from "next-auth";
-import type {AppType} from "next/app";
-import {trpc} from "@/utils/trpc";
+import type { AppType } from "next/app";
+import { trpc } from "@/utils/trpc";
+import { UserContextProvider } from "@/context/user.context";
 
+const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
+  const { data, isLoading } = trpc.user.me.useQuery();
 
-const MyApp: AppType<{ session: Session | null }> = ({
-                                                         Component,
-                                                         pageProps: {session, ...pageProps},
-                                                     }) => {
-    return (
-        <SessionProvider session={session}>
-            <Component {...pageProps} />
-        </SessionProvider>
-    );
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <UserContextProvider value={data}>
+      <Component {...pageProps} />
+    </UserContextProvider>
+  );
 };
 
 export default trpc.withTRPC(MyApp);

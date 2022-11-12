@@ -7,4 +7,10 @@ import {createContext} from "@/server/context";
 export default trpcNext.createNextApiHandler({
     router: appRouter,
     createContext,
+    onError({error}) {
+        // handle errors
+        if (error.code === 'INTERNAL_SERVER_ERROR') {
+            console.error(error);
+        }
+    }
 });

@@ -2,19 +2,23 @@ import Link from "next/link";
 import {useCallback, useState} from "react";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {signIn} from "next-auth/react";
 
 import IntroLayout from "../../client/Layout/intro";
-import {authedNoEntry} from "@/utils/authedNoEntry";
 import {ILogin, IOtpFrontendVerify, loginSchema, otpFrontendVerifySchema} from "@/utils/validation/auth";
 import {trpc} from "@/utils/trpc";
-
-export const getServerSideProps = authedNoEntry(async (ctx) => {
-    return {props: {}};
-});
+import {useRouter} from "next/router";
+import {useUserContext} from "@/context/user.context";
 
 
 function Login() {
+    const router = useRouter();
+
+    const data = useUserContext();
+
+    if (data) {
+        router.push('/dashboard');
+    }
+
     const [logData, setLogData] = useState<ILogin>();
     const [otpEnv, setOtpEnv] = useState(false);
 
@@ -26,8 +30,8 @@ function Login() {
         resolver: zodResolver(loginSchema),
     });
 
-    const otpVerifyMutation = trpc.checkOTP.useMutation()
-    const otpMutation = trpc.sendOTP.useMutation()
+    const otpVerifyMutation = trpc.otp.verifyWithLogin.useMutation()
+    const otpMutation = trpc.otp.generate.useMutation()
 
     const onSubmit = useCallback(
         async (data: ILogin) => {
@@ -41,9 +45,6 @@ function Login() {
     const onOTP = useCallback(async (data: IOtpFrontendVerify) => {
         if (logData !== undefined) {
             const res = await otpVerifyMutation.mutateAsync({email: logData?.email, otp: data.otp});
-            if (res) {
-                await signIn("credentials", {...logData, callbackUrl: "/dashboard"});
-            }
         }
     }, [logData, otpVerifyMutation]);
 
