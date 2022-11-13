@@ -13,11 +13,17 @@ export const sendEmail = async ({
     mailConfig = {
       host: "smtp.mail.me.com",
       port: 587,
-      secure: true,
+      secure: false,
+      tls: {
+        ciphers: "SSLv3",
+        rejectUnauthorized: false,
+      },
       auth: {
-        user: "no-reply-healthsake@gjd.one",
+        user: "guntupallijaideep@icloud.com",
         pass: process.env.EMAIL_PASS,
       },
+      debug: true,
+      logger: true,
     };
   } else {
     const testAccount = await nodemailer.createTestAccount();
