@@ -7,6 +7,7 @@ import { useUserContext } from "@/context/user.context";
 import Link from "next/link";
 
 const Home: NextPage = () => {
+  console.log(process.env.BASE_URL);
   const router = useRouter();
 
   const ctxUser = useUserContext();
@@ -54,7 +55,7 @@ const Home: NextPage = () => {
                     if (user.status === "PENDING") {
                       return (
                         <a
-                          href={`${process.env.BASE_URL}/user/` + user.id}
+                          href={`/user/${user.id}`}
                           key={user.id}
                           className="flex flex-col gap-2 rounded-2xl border-2 border-gray-100 bg-gray-700 p-6 text-indigo-300"
                         >
@@ -538,7 +539,7 @@ const Home: NextPage = () => {
                     if (user.status === "PENDING") {
                       return (
                         <a
-                          href={`${process.env.BASE_URL}/user/` + user.id}
+                          href={`/user/${user.id}`}
                           key={user.id}
                           className="flex flex-col gap-2 rounded-2xl border-2 border-gray-100 bg-gray-700 p-6 text-indigo-300"
                         >
@@ -697,7 +698,7 @@ const Home: NextPage = () => {
                     if (user.status === "APPROVED") {
                       return (
                         <a
-                          href={`${process.env.BASE_URL}/user/` + user.id}
+                          href={`/user/${user.id}`}
                           key={user.id}
                           className="flex flex-col items-start gap-2 rounded-2xl border-2 border-green-100 bg-green-700 p-6 text-indigo-300"
                         >
@@ -856,7 +857,7 @@ const Home: NextPage = () => {
                     if (user.status === "REJECTED") {
                       return (
                         <a
-                          href={`${process.env.BASE_URL}/user/` + user.id}
+                          href={`/user/${user.id}`}
                           key={user.id}
                           className="flex flex-col gap-2 rounded-2xl border-2 border-red-100 bg-red-700 p-6 text-indigo-300"
                         >
@@ -1024,7 +1025,7 @@ const Home: NextPage = () => {
                     if (user.status === "PENDING") {
                       return (
                         <a
-                          href={`${process.env.BASE_URL}/user/` + user.id}
+                          href={`/user/${user.id}`}
                           key={user.id}
                           className="flex flex-col gap-2 rounded-2xl border-2 border-gray-100 bg-gray-700 p-6 text-indigo-300"
                         >
@@ -1183,7 +1184,7 @@ const Home: NextPage = () => {
                     if (user.status === "APPROVED") {
                       return (
                         <a
-                          href={`${process.env.BASE_URL}/user/` + user.id}
+                          href={`/user/${user.id}`}
                           key={user.id}
                           className="flex flex-col gap-2 rounded-2xl border-2 border-green-100 bg-green-700 p-6 text-indigo-300"
                         >
@@ -1342,7 +1343,7 @@ const Home: NextPage = () => {
                     if (user.status === "REJECTED") {
                       return (
                         <a
-                          href={`${process.env.BASE_URL}/user/` + user.id}
+                          href={`/user/${user.id}`}
                           key={user.id}
                           className="flex flex-col gap-2 rounded-2xl border-2 border-red-100 bg-red-700 p-6 text-indigo-300"
                         >
@@ -1550,7 +1551,7 @@ const Home: NextPage = () => {
                 })
                 .map((user: any) => (
                   <a
-                    href={`${process.env.BASE_URL}/user/` + user.id}
+                    href={`/user/${user.id}`}
                     key={user.id}
                     className="flex w-2/3 flex-col gap-2 rounded-2xl border-2 border-gray-100 bg-gray-700 p-6 text-indigo-300"
                   >
