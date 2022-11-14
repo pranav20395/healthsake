@@ -44,12 +44,12 @@ export const sendEmail = async ({
     to: email,
     subject: "OTP Email",
     html: `<div
-    style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2; background-color: #1f2937; color:#eee">
+    style="font-family: Helvetica,Arial,sans-serif;min-width:100vw;min-height:100vh;overflow:auto;line-height:2; background-color: #1f2937; color:#eee">
     <div style="margin:50px auto;width:70%;padding:20px 0">
         <div style="border-bottom:1px solid #545FDB">
             <a href="https://192.168.2.239/" style="font-size:1.4em;color: #eee;text-decoration:none;font-weight:600"
                 target="_blank">
-                <img src="https://192.168.2.239/_next/static/media/stethoscope.29330117.svg" alt="HealthSake Logo"
+                <img src="https://raw.githubusercontent.com/JaideepGuntupalli/fcsake/trunk/src/assets/icons/stethoscope.svg?token=GHSAT0AAAAAABZ27RZASVEX5362P3VVCCD6Y3SLX5A" alt="HealthSake Logo"
                     width="20">
                 HealthSake</a>
         </div>
