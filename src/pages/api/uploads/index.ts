@@ -20,12 +20,14 @@ type NextApiRequestWithFormData = NextApiRequest &
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, path.join(__dirname, "../../../../public/uploads"));
+      cb(null, path.join(__dirname, "../../../../uploads"));
     },
     filename: (req, file, cb) =>
       cb(
         null,
-        new Date().toISOString() + file.originalname.replaceAll(" ", "-")
+        "healthsake_assets" +
+          new Date().toISOString() +
+          file.originalname.replaceAll(" ", "-")
       ),
   }),
 });
@@ -64,12 +66,7 @@ uploadFiles
   .post(async (req, res) => {
     const { file, userId } = req;
     const { originalname, filename, mimetype } = file;
-
-    console.log(originalname);
-    console.log(filename);
-    console.log(file);
-    console.log(userId);
-    const url = `${process.env.BASE_URL}/uploads/` + filename;
+    const url = `${process.env.BASE_URL}file/` + filename;
 
     if (userId) {
       const upload = await prisma.fileStorage.create({

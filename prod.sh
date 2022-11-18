@@ -1,5 +1,7 @@
 yarn install
 
+rm -rf uploads
+
 yarn prisma migrate reset --force
 
 rm /public/uploads/*
