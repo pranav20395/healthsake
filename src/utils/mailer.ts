@@ -49,7 +49,7 @@ export const sendEmail = async ({
         <div style="border-bottom:1px solid #545FDB">
             <a href="https://192.168.2.239/" style="font-size:1.4em;color: #eee;text-decoration:none;font-weight:600"
                 target="_blank">
-                <img src="https://raw.githubusercontent.com/JaideepGuntupalli/fcsake/trunk/src/assets/icons/stethoscope.svg?token=GHSAT0AAAAAABZ27RZASVEX5362P3VVCCD6Y3SLX5A" alt="HealthSake Logo"
+                <img src="https://svgshare.com/i/oMF.svg" alt="HealthSake Logo"
                     width="20">
                 HealthSake</a>
         </div>

@@ -3,6 +3,7 @@ import Layout from "@/client/Layout";
 import { trpc } from "@/utils/trpc";
 import Link from "next/link";
 import { useUserContext } from "@/context/user.context";
+import Image from "next/image";
 
 const Post = () => {
   const router = useRouter();
@@ -32,6 +33,9 @@ const Post = () => {
     if (user.type === "INDIVIDUAL" && user.individual.role === "PATIENT") {
       router.push("/dashboard");
     }
+    if (user.status !== "APPROVED") {
+      router.push("/dashboard");
+    }
   }
 
   if (user.status === "PENDING") {
@@ -54,7 +58,7 @@ const Post = () => {
             <div>{user.status}</div>
           </div>
           <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Type:</div>
+            <div className="font-medium text-white">Role:</div>
             <div>{user.type}</div>
           </div>
           {user.type === "INDIVIDUAL" ? (
@@ -99,40 +103,47 @@ const Post = () => {
           {user.type === "ORGANIZATION" || user.type === "ORGANISATION" ? (
             <>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Role:</div>
+                <div className="font-medium text-white">Type:</div>
                 <div>{user.organisation?.role}</div>
               </div>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image1:</div>
-                <Link target={"_blank"} href={user.organisation?.image1 || ""}>
-                  {user.organisation?.image1 || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image2:</div>
-                <Link target={"_blank"} href={user.organisation?.image2 || ""}>
-                  {user.organisation?.image2 || ""}
-                </Link>
+                <div className="font-medium text-white">Images:</div>
+                <div>
+                  {user.organisation.imageFileDetails.map((image: any) => (
+                    <>
+                      <Link key={image.fileId} href={image.url}>
+                        {image.url}
+                      </Link>
+                      <br />
+                    </>
+                  ))}
+                </div>
               </div>
               <div className="flex flex-row gap-2">
                 <div className="font-medium text-white">License:</div>
-                <Link target={"_blank"} href={user.organisation?.license || ""}>
-                  {user.organisation?.license || ""}
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.license.url || ""}
+                >
+                  {user.organisation?.license.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">
                 <div className="font-medium text-white">Permit:</div>
-                <Link target={"_blank"} href={user.organisation?.permit || ""}>
-                  {user.organisation?.permit || ""}
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.permit.url || ""}
+                >
+                  {user.organisation?.permit.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Location:</div>
+                <div className="font-medium text-white">Address:</div>
                 <Link
                   target={"_blank"}
-                  href={user.organisation?.location || ""}
+                  href={user.organisation?.addressProof.url || ""}
                 >
-                  {user.organisation?.location || ""}
+                  {user.organisation?.addressProof.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">
@@ -206,43 +217,50 @@ const Post = () => {
           ) : (
             <></>
           )}
-          {user.type === "ORGANIZATION" ? (
+          {user.type === "ORGANIZATION" || user.type === "ORGANISATION" ? (
             <>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Role:</div>
+                <div className="font-medium text-white">Type:</div>
                 <div>{user.organisation?.role}</div>
               </div>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image1:</div>
-                <Link target={"_blank"} href={user.organisation?.image1 || ""}>
-                  {user.organisation?.image1 || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image2:</div>
-                <Link target={"_blank"} href={user.organisation?.image2 || ""}>
-                  {user.organisation?.image2 || ""}
-                </Link>
+                <div className="font-medium text-white">Images:</div>
+                <div>
+                  {user.organisation.imageFileDetails.map((image: any) => (
+                    <>
+                      <Link key={image.fileId} href={image.url}>
+                        {image.url}
+                      </Link>
+                      <br />
+                    </>
+                  ))}
+                </div>
               </div>
               <div className="flex flex-row gap-2">
                 <div className="font-medium text-white">License:</div>
-                <Link target={"_blank"} href={user.organisation?.license || ""}>
-                  {user.organisation?.license || ""}
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.license.url || ""}
+                >
+                  {user.organisation?.license.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">
                 <div className="font-medium text-white">Permit:</div>
-                <Link target={"_blank"} href={user.organisation?.permit || ""}>
-                  {user.organisation?.permit || ""}
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.permit.url || ""}
+                >
+                  {user.organisation?.permit.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Location:</div>
+                <div className="font-medium text-white">Address:</div>
                 <Link
                   target={"_blank"}
-                  href={user.organisation?.location || ""}
+                  href={user.organisation?.addressProof.url || ""}
                 >
-                  {user.organisation?.location || ""}
+                  {user.organisation?.addressProof.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">
@@ -316,43 +334,50 @@ const Post = () => {
           ) : (
             <></>
           )}
-          {user.type === "ORGANIZATION" ? (
+          {user.type === "ORGANIZATION" || user.type === "ORGANISATION" ? (
             <>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Role:</div>
+                <div className="font-medium text-white">Type:</div>
                 <div>{user.organisation?.role}</div>
               </div>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image1:</div>
-                <Link target={"_blank"} href={user.organisation?.image1 || ""}>
-                  {user.organisation?.image1 || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image2:</div>
-                <Link target={"_blank"} href={user.organisation?.image2 || ""}>
-                  {user.organisation?.image2 || ""}
-                </Link>
+                <div className="font-medium text-white">Images:</div>
+                <div>
+                  {user.organisation.imageFileDetails.map((image: any) => (
+                    <>
+                      <Link key={image.fileId} href={image.url}>
+                        {image.url}
+                      </Link>
+                      <br />
+                    </>
+                  ))}
+                </div>
               </div>
               <div className="flex flex-row gap-2">
                 <div className="font-medium text-white">License:</div>
-                <Link target={"_blank"} href={user.organisation?.license || ""}>
-                  {user.organisation?.license || ""}
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.license.url || ""}
+                >
+                  {user.organisation?.license.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">
                 <div className="font-medium text-white">Permit:</div>
-                <Link target={"_blank"} href={user.organisation?.permit || ""}>
-                  {user.organisation?.permit || ""}
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.permit.url || ""}
+                >
+                  {user.organisation?.permit.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Location:</div>
+                <div className="font-medium text-white">Address:</div>
                 <Link
                   target={"_blank"}
-                  href={user.organisation?.location || ""}
+                  href={user.organisation?.addressProof.url || ""}
                 >
-                  {user.organisation?.location || ""}
+                  {user.organisation?.addressProof.url || ""}
                 </Link>
               </div>
               <div className="flex flex-row gap-2">

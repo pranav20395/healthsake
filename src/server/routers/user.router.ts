@@ -1,936 +1,527 @@
-import {publicProcedure, router} from "@/server/trpc";
-import {orgSignUpSchema, signUpSchema} from "@/utils/validation/auth";
+import { publicProcedure, router, t } from "@/server/trpc";
 import * as trpc from "@trpc/server";
-import {hash} from "argon2";
-import {serialize} from "cookie";
 import {
-    approveUserSchema,
-    orgSchemaForVerification,
-    patientSchemaForVerification,
-    updateProfileSchema,
-    userDetailsSchema
+  updateProfileSchema,
+  userDetailsSchema,
 } from "@/utils/validation/verify";
 
+const isApprovedUser = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.user) {
+    throw new trpc.TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Not authenticated",
+    });
+  }
+
+  const user = await ctx.prisma.user.findUnique({
+    where: {
+      id: ctx.user.id,
+    },
+  });
+
+  if (!user || user.status !== "APPROVED") {
+    throw new trpc.TRPCError({
+      code: "NOT_FOUND",
+      message: "User not found/not approved",
+    });
+  }
+
+  return next({
+    ctx: {
+      user: ctx.user,
+    },
+  });
+});
+
+export const approvedUserProcedure = publicProcedure.use(isApprovedUser);
+
 export const userRouter = router({
-    registerUser: publicProcedure
-        .input(signUpSchema)
-        .mutation(async (req) => {
-            const {input, ctx} = req;
-            const {fname, lname, email, password} = await signUpSchema.parseAsync(input);
+  profile: approvedUserProcedure.query(async (req) => {
+    const { ctx } = req;
 
-            const exists = await ctx.prisma.user.findFirst({
-                where: {email},
-            });
+    try {
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          id: ctx.user.id,
+        },
+      });
 
-            if (exists) {
-                throw new trpc.TRPCError({
-                    code: "CONFLICT",
-                    message: "User already exists.",
-                });
-            }
+      if (!user) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
 
-            const hashedPassword = await hash(password);
+      if (user.type === "ADMIN") {
+        return {
+          status: 200,
+          message: "Admin profile",
+          result: user,
+        };
+      }
 
-            const name = fname + " " + lname;
+      if (user.type === "INDIVIDUAL" && user.indID) {
+        const individual = await ctx.prisma.individual.findUnique({
+          where: {
+            id: user.indID,
+          },
+        });
 
-            try {
-                const individual = await ctx.prisma.individual.create({
-                    data: {
-                        role: "USER",
-                    }
-                });
+        const { password, ...userDetails } = user;
 
-                const result = await ctx.prisma.user.create({
-                    data: {name, email, password: hashedPassword, type: "INDIVIDUAL", indID: individual.id},
-                });
+        return {
+          status: 200,
+          message: "User found",
+          result: {
+            ...userDetails,
+            individual,
+          },
+        };
+      }
 
-                return {
-                    status: 201,
-                    message: "Account created successfully",
-                    result: result.email,
-                };
-            } catch (err) {
-                throw new trpc.TRPCError({
-                    code: "CONFLICT",
-                    message: "Error creating user.",
-                });
-            }
-        }),
-    registerOrg: publicProcedure
-        .input(orgSignUpSchema)
-        .mutation(async (req) => {
-            const {input, ctx} = req;
-            // const {email, password, username} = await signUpSchema.parseAsync(input);
-            const {name, description, email, password} = input;
+      if (
+        (user.type === "ORGANISATION" || user.type === "ORGANIZATION") &&
+        user.orgId
+      ) {
+        const org = await ctx.prisma.organisation.findUnique({
+          where: {
+            id: user.orgId,
+          },
+        });
 
-            const exists = await ctx.prisma.user.findFirst({
-                where: {email},
-            });
+        if (!org) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
 
-            if (exists) {
-                throw new trpc.TRPCError({
-                    code: "CONFLICT",
-                    message: "User already exists.",
-                });
-            }
+        let address = await ctx.prisma.addressProof.findUnique({
+          where: {
+            id: org.addressId!,
+          },
+        });
 
-            const hashedPassword = await hash(password);
+        if (!address) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
 
-            const org = await ctx.prisma.organisation.create({
-                data: {
-                    description
-                }
-            });
+        const addrFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: address.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
 
-            const result = await ctx.prisma.user.create({
-                data: {name, email, password: hashedPassword, type: "ORGANISATION", orgId: org.id},
+        address = {
+          ...address,
+          ...addrFileDetails,
+        };
+
+        let permit = await ctx.prisma.permit.findUnique({
+          where: {
+            id: org.permitId!,
+          },
+        });
+
+        if (!permit) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
+
+        const permitFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: permit.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
+
+        permit = {
+          ...permit,
+          ...permitFileDetails,
+        };
+
+        let license = await ctx.prisma.license.findUnique({
+          where: {
+            id: org.licenseId!,
+          },
+        });
+
+        if (!license) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
+
+        const licenseFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: license.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
+
+        license = {
+          ...license,
+          ...licenseFileDetails,
+        };
+
+        const images = await ctx.prisma.image.findMany({
+          where: {
+            orgId: org.id,
+          },
+        });
+
+        const imageFileDetails = await Promise.all(
+          images.map(async (image) => {
+            const imageFile = await ctx.prisma.fileStorage.findUnique({
+              where: {
+                id: image.fileId,
+              },
+              select: {
+                ownerId: true,
+                url: true,
+              },
             });
 
             return {
-                status: 201,
-                message: "Account created successfully",
-                result: result.email,
+              ...image,
+              ...imageFile,
             };
-        }),
-    me: publicProcedure
-        .query(async (req) => {
-            const {ctx} = req;
+          })
+        );
 
-            if (!ctx.user) {
-                return null;
-            }
+        const updatedOrg = {
+          ...org,
+          addressProof: address,
+          permit,
+          license,
+          imageFileDetails,
+        };
 
-            return ctx.user;
-        }),
-    verifyRealUser: publicProcedure
-        .query(async (req) => {
-            const {ctx} = req;
+        const { password, ...userDetails } = user;
 
-            if (!ctx.user) {
-                return null;
-            }
+        return {
+          status: 200,
+          message: "User found",
+          result: {
+            ...userDetails,
+            updatedOrg,
+          },
+        };
+      }
+    } catch (e) {
+      throw new trpc.TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Not authenticated",
+      });
+    }
+  }),
+  userDetails: approvedUserProcedure
+    .input(userDetailsSchema)
+    .query(async (req) => {
+      const { input, ctx } = req;
 
-            return ctx.user;
-        }),
-    profile: publicProcedure
-        .query(async (req) => {
-            const {ctx} = req;
+      const { userId } = userDetailsSchema.parse(input);
 
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
 
-            try {
-                const user = await ctx.prisma.user.findUnique({
-                    where: {
-                        id: ctx.user.id
-                    }
-                });
+      if (!user) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
 
-                if (!user) {
-                    throw new trpc.TRPCError({
-                        code: "NOT_FOUND",
-                        message: "User not found",
-                    });
-                }
+      if (user.type === "INDIVIDUAL" && user.indID) {
+        const ind = await ctx.prisma.individual.findUnique({
+          where: {
+            id: user.indID,
+          },
+        });
 
-                if (user.type === "ADMIN") {
-                    return {
-                        status: 200,
-                        message: "Admin profile",
-                        result: user
-                    }
-                }
+        if (!ind) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
 
-                if (user.type === "INDIVIDUAL" && user.indID) {
-                    const individual = await ctx.prisma.individual.findUnique({
-                        where: {
-                            id: user.indID
-                        }
-                    });
+        return {
+          status: 200,
+          message: "User found",
+          result: {
+            ...user,
+            individual: ind,
+          },
+        };
+      } else if (
+        (user.type === "ORGANISATION" || user.type === "ORGANIZATION") &&
+        user.orgId
+      ) {
+        const org = await ctx.prisma.organisation.findUnique({
+          where: {
+            id: user.orgId,
+          },
+        });
 
-                    const {password, ...userDetails} = user;
+        if (!org) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
 
-                    return {
-                        status: 200,
-                        message: "User found",
-                        result: {
-                            ...userDetails,
-                            individual
-                        }
-                    };
-                }
+        let address = await ctx.prisma.addressProof.findUnique({
+          where: {
+            id: org.addressId!,
+          },
+        });
 
-                if ((user.type === "ORGANISATION" || user.type === "ORGANIZATION") && user.orgId) {
-                    const org = await ctx.prisma.organisation.findUnique({
-                        where: {
-                            id: user.orgId
-                        }
-                    });
+        if (!address) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
 
-                    const {password, ...userDetails} = user;
+        const addrFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: address.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
 
-                    return {
-                        status: 200,
-                        message: "User found",
-                        result: {
-                            ...userDetails,
-                            org
-                        }
-                    };
-                }
-            } catch (e) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-        }),
-    logout: publicProcedure
-        .mutation(async (req) => {
-            const {ctx} = req;
+        address = {
+          ...address,
+          ...addrFileDetails,
+        };
 
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+        let permit = await ctx.prisma.permit.findUnique({
+          where: {
+            id: org.permitId!,
+          },
+        });
 
-            try {
-                ctx.res.setHeader('Set-Cookie', serialize('token', '', {maxAge: -1, path: '/'}))
+        if (!permit) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
 
-                return {
-                    status: 200,
-                    message: "Logged out successfully",
-                    result: null
-                };
-            } catch (e) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-        }),
-    userSubmitForVerification: publicProcedure
-        .input(patientSchemaForVerification)
-        .mutation(async (req) => {
-            const {input, ctx} = req;
+        const permitFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: permit.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
 
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+        permit = {
+          ...permit,
+          ...permitFileDetails,
+        };
 
-            const {role, address, identity, profileImage, healthLicense} = patientSchemaForVerification.parse(input);
+        let license = await ctx.prisma.license.findUnique({
+          where: {
+            id: org.licenseId!,
+          },
+        });
 
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.user.id
-                }
-            });
+        if (!license) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
 
-            if (!user) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User not found",
-                });
-            }
+        const licenseFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: license.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
 
-            if (!user.indID) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User not found",
-                });
-            }
+        license = {
+          ...license,
+          ...licenseFileDetails,
+        };
 
-            const ind = await ctx.prisma.individual.findUnique({
-                where: {
-                    id: user.indID
-                }
-            });
+        const images = await ctx.prisma.image.findMany({
+          where: {
+            orgId: org.id,
+          },
+        });
 
-            if (!ind) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Patient not found",
-                });
-            }
-
-            if (role === "PATIENT") {
-
-
-                const patientUpdate = await ctx.prisma.individual.update({
-                    where: {
-                        id: ind.id
-                    },
-                    data: {
-                        address,
-                        identity,
-                        role: "PATIENT",
-                        image: profileImage,
-                    }
-                });
-
-                if (!patientUpdate) {
-                    throw new trpc.TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Patient not found",
-                    });
-                }
-
-                const userUpdate = await ctx.prisma.user.update({
-                    where: {
-                        id: ctx.user.id
-                    },
-                    data: {
-                        status: "PENDING"
-                    }
-                });
-
-                return {
-                    status: 200,
-                    message: "Patient created successfully",
-                };
-            } else if (role === "HEALTHCARE") {
-
-                const docUpdate = await ctx.prisma.individual.update({
-                    where: {
-                        id: ind.id
-                    },
-                    data: {
-                        address,
-                        identity,
-                        role: "HEALTHCARE",
-                        image: profileImage,
-                        healthLicense
-                    }
-                });
-
-                if (!docUpdate) {
-                    throw new trpc.TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Patient not found",
-                    });
-                }
-
-                const userUpdate = await ctx.prisma.user.update({
-                    where: {
-                        id: ctx.user.id
-                    },
-                    data: {
-                        status: "PENDING"
-                    }
-                });
-
-                return {
-                    status: 200,
-                    message: "Patient created successfully",
-                };
-            }
-
-        }),
-    orgSubmitForVerification: publicProcedure
-        .input(orgSchemaForVerification)
-        .mutation(async (req) => {
-            const {input, ctx} = req;
-
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
-            const {location, permit, image1, image2, license, phone, role} = orgSchemaForVerification.parse(input);
-
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.user.id
-                }
-            });
-
-            if (!user) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User not found",
-                });
-            }
-
-            if (!user.orgId) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User not found",
-                });
-            }
-
-            const org = await ctx.prisma.organisation.findUnique({
-                where: {
-                    id: user.orgId
-                }
-            });
-
-            if (!org) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Organisation not found",
-                });
-            }
-
-            const orgUpdate = await ctx.prisma.organisation.update({
-                where: {
-                    id: org.id
-                },
-                data: {
-                    image1,
-                    image2,
-                    location,
-                    permit,
-                    license,
-                    phone,
-                    role
-                }
-            });
-
-            if (!orgUpdate) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Organisation not found",
-                });
-            }
-
-            const userUpdate = await ctx.prisma.user.update({
-                where: {
-                    id: ctx.user.id
-                },
-                data: {
-                    status: "PENDING"
-                }
+        const imageFileDetails = await Promise.all(
+          images.map(async (image) => {
+            const imageFile = await ctx.prisma.fileStorage.findUnique({
+              where: {
+                id: image.fileId,
+              },
+              select: {
+                ownerId: true,
+                url: true,
+              },
             });
 
             return {
-                status: 200,
-                message: "Organisation created successfully",
+              ...image,
+              ...imageFile,
             };
+          })
+        );
 
-        }),
-    allUsersPendingVerification: publicProcedure
-        .query(async (req) => {
-            const {ctx} = req;
+        const updatedOrg = {
+          ...org,
+          addressProof: address,
+          permit,
+          license,
+          imageFileDetails,
+        };
 
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+        return {
+          status: 200,
+          message: "User found",
+          result: {
+            ...user,
+            organisation: updatedOrg,
+          },
+        };
+      }
 
-            const admin = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.user.id
-                }
-            });
+      return {
+        status: 200,
+        message: "User found",
+        result: user,
+      };
+    }),
+  allHealthCareAndOrganisations: approvedUserProcedure.query(async (req) => {
+    const { ctx } = req;
 
-            if (!admin) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+    const users = await ctx.prisma.user.findMany({
+      where: {
+        status: "APPROVED",
+        userVerified: true,
+      },
+    });
 
-            const users = await ctx.prisma.user.findMany({
-                where: {
-                    status: "PENDING"
-                }
-            });
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
 
-            for (let i = 0; i < users.length; i++) {
-                const user = users[i];
+      if (user) {
+        if (user.type === "INDIVIDUAL" && user.indID) {
+          const ind = await ctx.prisma.individual.findFirst({
+            where: {
+              id: user.indID,
+            },
+          });
 
-                if (!user) {
-                    throw new trpc.TRPCError({
-                        code: "NOT_FOUND",
-                        message: "User not found",
-                    });
-                }
-
-                if (user.type === "INDIVIDUAL" && user.indID) {
-
-                    const ind = await ctx.prisma.individual.findUnique({
-                        where: {
-                            id: user.indID
-                        }
-                    });
-                    if (!ind) {
-                        throw new trpc.TRPCError({
-                            code: "NOT_FOUND",
-                            message: "User not found",
-                        });
-                    }
-
-                    users[i] = {
-                        ...user,
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        individual: ind
-                    }
-                } else if ((user.type === "ORGANISATION" || user.type === "ORGANIZATION") && user.orgId) {
-                    const org = await ctx.prisma.organisation.findUnique({
-                        where: {
-                            id: user.orgId
-                        }
-                    });
-                    if (!org) {
-                        throw new trpc.TRPCError({
-                            code: "NOT_FOUND",
-                            message: "User not found",
-                        });
-                    }
-
-                    users[i] = {
-                        ...user,
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        organisation: org
-                    }
-                }
-            }
-
-            return {
-                status: 200,
-                message: "Users found",
-                result: users
+          if (ind && ind.role === "HEALTHCARE") {
+            users[i] = {
+              ...user,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              individual: ind,
             };
-        }),
-    allApprovedUsers: publicProcedure
-        .query(async (req) => {
-            const {ctx} = req;
-
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
-            const admin = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.user.id
-                }
-            });
-
-            if (!admin) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
-            const users = await ctx.prisma.user.findMany({
-                where: {
-                    status: "APPROVED"
-                }
-            });
-
-            for (let i = 0; i < users.length; i++) {
-                const user = users[i];
-
-                if (!user) {
-                    throw new trpc.TRPCError({
-                        code: "NOT_FOUND",
-                        message: "User not found",
-                    });
-                }
-
-                if (user.type === "INDIVIDUAL" && user.indID) {
-
-                    const ind = await ctx.prisma.individual.findUnique({
-                        where: {
-                            id: user.indID
-                        }
-                    });
-                    if (!ind) {
-                        throw new trpc.TRPCError({
-                            code: "NOT_FOUND",
-                            message: "User not found",
-                        });
-                    }
-
-                    users[i] = {
-                        ...user,
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        individual: ind
-                    }
-                } else if ((user.type === "ORGANISATION" || user.type === "ORGANIZATION") && user.orgId) {
-                    const org = await ctx.prisma.organisation.findUnique({
-                        where: {
-                            id: user.orgId
-                        }
-                    });
-                    if (!org) {
-                        throw new trpc.TRPCError({
-                            code: "NOT_FOUND",
-                            message: "User not found",
-                        });
-                    }
-
-                    users[i] = {
-                        ...user,
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        organisation: org
-                    }
-                }
-            }
-
-            return {
-                status: 200,
-                message: "Users found",
-                result: users
+          } else {
+            // remove user[i] from array
+            users.splice(i, 1);
+            i--;
+          }
+        } else if (
+          (user.type === "ORGANISATION" || user.type === "ORGANIZATION") &&
+          user.orgId
+        ) {
+          const org = await ctx.prisma.organisation.findUnique({
+            where: {
+              id: user.orgId,
+            },
+          });
+          if (org) {
+            users[i] = {
+              ...user,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              organisation: org,
             };
-        }),
-    allRejectedUsers: publicProcedure
-        .query(async (req) => {
-            const {ctx} = req;
+          } else {
+            // remove user[i] from array
+            users.splice(i, 1);
+          }
+        } else if (user.type === "ADMIN") {
+          users.splice(i, 1);
+          i--;
+        }
+      }
+    }
 
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+    return {
+      status: 200,
+      message: "Users found",
+      result: users,
+    };
+  }),
+  updateProfile: approvedUserProcedure
+    .input(updateProfileSchema)
+    .mutation(async (req) => {
+      const { input, ctx } = req;
 
-            const admin = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.user.id
-                }
-            });
+      const { name } = updateProfileSchema.parse(input);
 
-            if (!admin) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          id: ctx.user.id,
+        },
+      });
 
-            const users = await ctx.prisma.user.findMany({
-                where: {
-                    status: "REJECTED"
-                }
-            });
+      if (!user) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
 
-            for (let i = 0; i < users.length; i++) {
-                const user = users[i];
+      const userUpdate = await ctx.prisma.user.update({
+        where: {
+          id: ctx.user.id,
+        },
+        data: {
+          name: name,
+        },
+      });
 
-                if (!user) {
-                    throw new trpc.TRPCError({
-                        code: "NOT_FOUND",
-                        message: "User not found",
-                    });
-                }
-
-                if (user.type === "INDIVIDUAL" && user.indID) {
-
-                    const ind = await ctx.prisma.individual.findUnique({
-                        where: {
-                            id: user.indID
-                        }
-                    });
-                    if (!ind) {
-                        throw new trpc.TRPCError({
-                            code: "NOT_FOUND",
-                            message: "User not found",
-                        });
-                    }
-
-                    users[i] = {
-                        ...user,
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        individual: ind
-                    }
-                } else if ((user.type === "ORGANISATION" || user.type === "ORGANIZATION") && user.orgId) {
-                    const org = await ctx.prisma.organisation.findUnique({
-                        where: {
-                            id: user.orgId
-                        }
-                    });
-                    if (!org) {
-                        throw new trpc.TRPCError({
-                            code: "NOT_FOUND",
-                            message: "User not found",
-                        });
-                    }
-
-                    users[i] = {
-                        ...user,
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        organisation: org
-                    }
-                }
-            }
-
-            return {
-                status: 200,
-                message: "Users found",
-                result: users
-            };
-        }),
-    changeUserStatus: publicProcedure
-        .input(approveUserSchema)
-        .mutation(async (req) => {
-            const {input, ctx} = req;
-
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
-            const {userId, userStatus, userVerified} = approveUserSchema.parse(input);
-
-            const admin = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.user.id
-                }
-            });
-
-            if (!admin) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: userId
-                }
-            });
-
-            if (!user) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User not found",
-                });
-            }
-
-            const userUpdate = await ctx.prisma.user.update({
-                where: {
-                    id: userId
-                },
-                data: {
-                    status: userStatus,
-                    userVerified: userVerified
-                }
-            });
-
-            return {
-                status: 200,
-                message: "User status changed successfully",
-            };
-        }),
-    userDetails: publicProcedure
-        .input(userDetailsSchema)
-        .query(async (req) => {
-            const {input, ctx} = req;
-
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
-            const {userId} = userDetailsSchema.parse(input);
-
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: userId
-                }
-            });
-
-            if (!user) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User not found",
-                });
-            }
-
-            if (user.type === "INDIVIDUAL" && user.indID) {
-
-                const ind = await ctx.prisma.individual.findUnique({
-                    where: {
-                        id: user.indID
-                    }
-                });
-
-                if (!ind) {
-                    throw new trpc.TRPCError({
-                        code: "NOT_FOUND",
-                        message: "User not found",
-                    });
-                }
-
-                return {
-                    status: 200,
-                    message: "User found",
-                    result: {
-                        ...user,
-                        individual: ind
-                    }
-                }
-            } else if ((user.type === "ORGANISATION" || user.type === "ORGANIZATION") && user.orgId) {
-                const org = await ctx.prisma.organisation.findUnique({
-                    where: {
-                        id: user.orgId
-                    }
-                });
-                if (!org) {
-                    throw new trpc.TRPCError({
-                        code: "NOT_FOUND",
-                        message: "User not found",
-                    });
-                }
-
-                return {
-                    status: 200,
-                    message: "User found",
-                    result: {
-                        ...user,
-                        organisation: org
-                    }
-                }
-            }
-
-            return {
-                status: 200,
-                message: "User found",
-                result: user
-            }
-        }),
-    allHealthCareAndOrganisations: publicProcedure
-        .query(async (req) => {
-            const {ctx} = req;
-
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
-            const users = await ctx.prisma.user.findMany({
-                where: {
-                    status: "APPROVED",
-                    userVerified: true
-                }
-            });
-
-            for (let i = 0; i < users.length; i++) {
-                const user = users[i];
-
-                if (user) {
-
-                    if (user.type === "INDIVIDUAL" && user.indID) {
-
-                        const ind = await ctx.prisma.individual.findFirst({
-                            where: {
-                                id: user.indID,
-                            }
-                        });
-
-                        if (ind && ind.role === "HEALTHCARE") {
-                            users[i] = {
-                                ...user,
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                // @ts-ignore
-                                individual: ind
-                            }
-                        } else {
-                            // remove user[i] from array
-                            users.splice(i, 1);
-                            i--;
-                        }
-                    } else if ((user.type === "ORGANISATION" || user.type === "ORGANIZATION") && user.orgId) {
-                        const org = await ctx.prisma.organisation.findUnique({
-                            where: {
-                                id: user.orgId
-                            }
-                        });
-                        if (org) {
-                            users[i] = {
-                                ...user,
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                // @ts-ignore
-                                organisation: org
-                            }
-
-                        } else {
-                            // remove user[i] from array
-                            users.splice(i, 1);
-                        }
-
-                    } else if (user.type === "ADMIN") {
-                        users.splice(i, 1);
-                        i--;
-                    }
-                }
-            }
-
-            return {
-                status: 200,
-                message: "Users found",
-                result: users
-            };
-        }),
-    updateProfile: publicProcedure
-        .input(updateProfileSchema)
-        .mutation(async (req) => {
-            const {input, ctx} = req;
-
-            if (!ctx.user) {
-                throw new trpc.TRPCError({
-                    code: "UNAUTHORIZED",
-                    message: "Not authenticated",
-                });
-            }
-
-            const {name} = updateProfileSchema.parse(input);
-
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                    id: ctx.user.id
-                }
-            });
-
-            if (!user) {
-                throw new trpc.TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User not found",
-                });
-            }
-
-            const userUpdate = await ctx.prisma.user.update({
-                where: {
-                    id: ctx.user.id
-                },
-                data: {
-                    name: name
-                }
-            });
-
-            return {
-                status: 200,
-                message: "Profile updated successfully",
-            }
-        }),
+      return {
+        status: 200,
+        message: "Profile updated successfully",
+      };
+    }),
 });

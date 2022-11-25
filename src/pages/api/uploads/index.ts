@@ -65,22 +65,17 @@ uploadFiles
   .use(upload.single("file"))
   .post(async (req, res) => {
     const { file, userId } = req;
-    const { originalname, filename, mimetype } = file;
+    const { filename, mimetype } = file;
     const url = `${process.env.BASE_URL}file/` + filename;
 
     if (userId) {
-      const upload = await prisma.fileStorage.create({
-        data: {
-          name: originalname,
-          url: url,
-          type: mimetype,
-          ownerId: userId,
-          size: file.size,
-          path: file.path,
-        },
+      res.status(200).json({
+        url: url,
+        type: mimetype,
+        ownerId: userId,
+        size: file.size,
+        path: file.path,
       });
-
-      res.status(200).json({ url });
     } else {
       res.status(401).json({ error: `Not authenticated` });
     }

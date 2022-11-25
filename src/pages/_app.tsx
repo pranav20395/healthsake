@@ -4,7 +4,7 @@ import { trpc } from "@/utils/trpc";
 import { UserContextProvider } from "@/context/user.context";
 
 const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
-  const { data, isLoading } = trpc.user.me.useQuery();
+  const { data, isLoading } = trpc.auth.me.useQuery();
 
   if (isLoading) return <div>Loading...</div>;
 
