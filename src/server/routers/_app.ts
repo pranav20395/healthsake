@@ -6,6 +6,7 @@ import { fileRouter } from "./file.router";
 import { authedUsersRouter } from "./authedUsers.router";
 import { verifyRouter } from "./verify.router";
 import { authRouter } from "./auth.router";
+import { walletRouter } from "./wallet.router";
 
 export const appRouter = router({
   user: userRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   file: fileRouter,
   verify: verifyRouter,
   auth: authRouter,
+  wallet: walletRouter,
 });
 
 // export type definition of API

@@ -22,8 +22,8 @@ model User {
   email                String            @unique
   password             String
   userVerified         Boolean           @default(false)
-  status               UserStatus        @default(CREATED)
-  type                 UserTypes         @default(INDIVIDUAL)
+  status               String            @default("CREATED")
+  type                 String            @default("INDIVIDUAL")
   indID                String?
   individual           Individual?       @relation(fields: [indID], references: [id])
   orgId                String?
@@ -37,20 +37,22 @@ model User {
   Bill                 Bill[]            @relation("organisation")
   patientInsuranceLogs InsuranceLogs[]   @relation("patient")
   InsuranceLogs        InsuranceLogs[]   @relation("insurance")
+  wallet               Wallet?           @relation(fields: [walletId], references: [id])
+  walletId             String?
 }
 
-enum UserStatus {
-  CREATED
-  PENDING
-  APPROVED
-  REJECTED
-}
+// enum UserStatus {
+//   CREATED
+//   PENDING
+//   APPROVED
+//   REJECTED
+// }
 
-enum UserTypes {
-  INDIVIDUAL
-  ORGANIZATION
-  ADMIN
-}
+// enum UserTypes {
+//   INDIVIDUAL
+//   ORGANIZATION
+//   ADMIN
+// }
 
 model Individual {
   id         String         @id @default(cuid())
@@ -62,14 +64,14 @@ model Individual {
   license    License?       @relation(fields: [licenseId], references: [id])
   addressId  String?
   address    AddressProof?  @relation(fields: [addressId], references: [id])
-  role       IndividualRole @default(PATIENT)
+  role       String         @default("PATIENT")
   User       User[]
 }
 
-enum IndividualRole {
-  PATIENT
-  HEALTHCARE
-}
+// enum IndividualRole {
+//   PATIENT
+//   HEALTHCARE
+// }
 
 model Organisation {
   id          String        @id @default(cuid())
@@ -82,15 +84,15 @@ model Organisation {
   permitId    String?
   permit      Permit?       @relation(fields: [permitId], references: [id])
   phone       String?
-  role        OrgRole       @default(HOSPITAL)
+  role        String        @default("HOSPITAL")
   User        User[]
 }
 
-enum OrgRole {
-  HOSPITAL
-  PHARMACY
-  INSURANCE
-}
+// enum OrgRole {
+//   HOSPITAL
+//   PHARMACY
+//   INSURANCE
+// }
 
 model Image {
   id         String        @id @default(cuid())
@@ -150,26 +152,28 @@ model Bill {
   patient        User            @relation("patient", fields: [patientId], references: [id])
   orgId          String
   organisation   User            @relation("organisation", fields: [orgId], references: [id])
-  purpose        BillPurpose     @default(CONSULTATION)
+  purpose        String          @default("CONSULTATION")
   prescriptionId String?
   prescription   Prescription?   @relation(fields: [prescriptionId], references: [id])
   InsuranceLogs  InsuranceLogs[]
 }
 
-enum BillPurpose {
-  CONSULTATION
-  PHARMACY
-  TEST
-}
+// enum BillPurpose {
+//   CONSULTATION
+//   PHARMACY
+//   TEST
+// }
 
 model InsuranceLogs {
-  id        String @id @default(cuid())
-  patientId String
-  patient   User   @relation("patient", fields: [patientId], references: [id])
-  insureId  String
-  insurance User   @relation("insurance", fields: [insureId], references: [id])
-  billId    String
-  bill      Bill   @relation(fields: [billId], references: [id])
+  id            String      @id @default(cuid())
+  patientId     String
+  patient       User        @relation("patient", fields: [patientId], references: [id])
+  insureId      String
+  insurance     User        @relation("insurance", fields: [insureId], references: [id])
+  billId        String
+  bill          Bill        @relation(fields: [billId], references: [id])
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
 }
 
 model OneTimeToken {
@@ -215,4 +219,23 @@ model Log {
   action    String
   value     String
   timestamp DateTime @default(now())
+}
+
+model Wallet {
+  id              String        @id @default(cuid())
+  balance         Int           @default(0)
+  recvTransaction Transaction[] @relation("recvTransaction")
+  Transaction     Transaction[] @relation("Transaction")
+  Owner           User[]
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  amount        Int
+  timestamp     DateTime        @default(now())
+  recvWalletId  String
+  recvWallet    Wallet          @relation("recvTransaction", fields: [recvWalletId], references: [id])
+  sendWalletId  String
+  sendWallet    Wallet          @relation("Transaction", fields: [sendWalletId], references: [id])
+  InsuranceLogs InsuranceLogs[]
 }

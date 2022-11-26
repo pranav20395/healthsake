@@ -72,13 +72,28 @@ export const authRouter = router({
         },
       });
 
+      const wallet = await ctx.prisma.wallet.create({
+        data: {
+          balance: 0,
+        },
+      });
+
       const result = await ctx.prisma.user.create({
         data: {
           name,
           email,
           password: hashedPassword,
           type: "INDIVIDUAL",
-          indID: individual.id,
+          individual: {
+            connect: {
+              id: individual.id,
+            },
+          },
+          wallet: {
+            connect: {
+              id: wallet.id,
+            },
+          },
         },
       });
 
@@ -149,6 +164,12 @@ export const authRouter = router({
         },
       });
 
+      const wallet = await ctx.prisma.wallet.create({
+        data: {
+          balance: 100000,
+        },
+      });
+
       const result = await ctx.prisma.user.create({
         data: {
           name,
@@ -158,6 +179,11 @@ export const authRouter = router({
           organisation: {
             connect: {
               id: org.id,
+            },
+          },
+          wallet: {
+            connect: {
+              id: wallet.id,
             },
           },
         },
