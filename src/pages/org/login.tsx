@@ -50,6 +50,7 @@ function Login() {
   });
   const otpMutation = trpc.otp.generate.useMutation({
     onSuccess: () => setOtpEnv(true),
+    onError: (err) => setLoggingErrors(err.message),
   });
 
   const onSubmit = useCallback(
