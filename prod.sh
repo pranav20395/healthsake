@@ -4,7 +4,7 @@ rm -rf uploads
 
 yarn prisma migrate reset --force
 
-rm /public/uploads/*
+rm /uploads/*
 
 yarn build
 
