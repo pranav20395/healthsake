@@ -111,7 +111,7 @@ function Login() {
           </label>
           <button
             onClick={() => setValue("type", "ORGANISATION")}
-            className="rounded-xl bg-indigo-600 p-3 px-8 text-sm transition-all ease-in-out hover:shadow-2xl"
+            className="rounded-xl bg-indigo-600 p-3 px-8 text-sm transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
             disabled={otpMutation.isLoading}
             type="submit"
           >
@@ -143,7 +143,7 @@ function Login() {
           </label>
           <button
             className="rounded-xl bg-indigo-600 p-3 px-8 text-sm transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
-            disabled={otpMutation.isLoading}
+            disabled={otpVerifyMutation.isLoading}
             type="submit"
           >
             Submit OTP

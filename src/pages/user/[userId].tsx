@@ -24,374 +24,162 @@ const Post = () => {
     userId: userId.toString(),
   });
 
-  let user: any = {};
   if (data) {
-    user = data.result;
+    const user = data.result;
+
+    if (ctxUser.type !== "ADMIN") {
+      if (user.type === "INDIVIDUAL" && user.individual.role === "PATIENT") {
+        router.push("/dashboard");
+      }
+      if (user.status !== "APPROVED") {
+        router.push("/dashboard");
+      }
+    }
+    console.log(user);
+
+    return (
+      <Layout title={"userId"}>
+        <div className=" relative h-60 w-full object-cover">
+          <Image
+            src="https://random.imagecdn.app/1500/300"
+            alt="cover photo"
+            layout="fill"
+          />
+        </div>
+
+        <div className="mx-12 my-6 flex flex-col items-start gap-2 p-6 text-indigo-300">
+          <div className="flex flex-row gap-2">
+            <div className="text-2xl font-medium">{user.name}</div>
+          </div>
+          {ctxUser.type === "ADMIN" && (
+            <>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Status:</div>
+                <div>{user.status}</div>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Type:</div>
+                <div>{user.type}</div>
+              </div>
+            </>
+          )}
+          {user.type === "INDIVIDUAL" ? (
+            <>
+              <div className="flex flex-row gap-2">
+                <div className="rounded-full bg-cyan-500 px-2 text-sm font-bold lowercase text-white">
+                  {user.individual?.role}
+                </div>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Email:</div>
+                <div>{user.email}</div>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Image:</div>
+                <Link target={"_blank"} href={user.individual?.image.url || ""}>
+                  {user.individual?.image.url || ""}
+                </Link>
+              </div>
+              {ctxUser.type === "ADMIN" && (
+                <>
+                  <div className="flex flex-row gap-2">
+                    <div className="font-medium text-white">
+                      Identity Proof:
+                    </div>
+                    <Link target={"_blank"} href={user.individual?.url || ""}>
+                      {user.individual?.identity.url || ""}
+                    </Link>
+                  </div>
+                  <div className="flex flex-row gap-2">
+                    <div className="font-medium text-white">Address Proof:</div>
+                    <Link
+                      target={"_blank"}
+                      href={user.individual?.address.url || ""}
+                    >
+                      {user.individual?.address.url || ""}
+                    </Link>
+                  </div>
+                </>
+              )}
+              {user.individual?.role === "HEALTHCARE" && (
+                <div className="flex flex-row gap-2">
+                  <div className="font-medium text-white">Health License:</div>
+                  <Link
+                    target={"_blank"}
+                    href={user.individual?.license.url || ""}
+                  >
+                    {user.individual?.license.url || ""}
+                  </Link>
+                </div>
+              )}
+            </>
+          ) : (
+            <></>
+          )}
+          {user.type === "ORGANIZATION" || user.type === "ORGANISATION" ? (
+            <>
+              <div className="flex flex-row gap-2">
+                <div className="rounded-full bg-purple-500 px-2 text-sm font-bold lowercase text-white">
+                  {user.organisation?.role}
+                </div>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Email:</div>
+                <div>{user.email}</div>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Images:</div>
+                <div>
+                  {user.organisation.imageFileDetails.map((image: any) => (
+                    <>
+                      <Link key={image.fileId} href={image.url}>
+                        {image.url}
+                      </Link>
+                      <br />
+                    </>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">License:</div>
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.license.url || ""}
+                >
+                  {user.organisation?.license.url || ""}
+                </Link>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Permit:</div>
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.permit.url || ""}
+                >
+                  {user.organisation?.permit.url || ""}
+                </Link>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Address:</div>
+                <Link
+                  target={"_blank"}
+                  href={user.organisation?.addressProof.url || ""}
+                >
+                  {user.organisation?.addressProof.url || ""}
+                </Link>
+              </div>
+              <div className="flex flex-row gap-2">
+                <div className="font-medium text-white">Phone:</div>
+                <div>{user.organisation?.phone}</div>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
+      </Layout>
+    );
   }
 
-  if (ctxUser.type !== "ADMIN") {
-    if (user.type === "INDIVIDUAL" && user.individual.role === "PATIENT") {
-      router.push("/dashboard");
-    }
-    if (user.status !== "APPROVED") {
-      router.push("/dashboard");
-    }
-  }
-
-  if (user.status === "PENDING") {
-    return (
-      <Layout title={"userId"}>
-        <div
-          key={user.id}
-          className="m-12 flex flex-col gap-2 rounded-2xl border-2 border-gray-100 bg-gray-700 p-6 text-indigo-300"
-        >
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Name:</div>
-            <div>{user.name}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Email:</div>
-            <div>{user.email}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Status:</div>
-            <div>{user.status}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Role:</div>
-            <div>{user.type}</div>
-          </div>
-          {user.type === "INDIVIDUAL" ? (
-            <>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Role:</div>
-                <div>{user.individual?.role}</div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image:</div>
-                <Link target={"_blank"} href={user.individual?.image || ""}>
-                  {user.individual?.image || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Identity Proof:</div>
-                <Link target={"_blank"} href={user.individual?.identity || ""}>
-                  {user.individual?.identity || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Address Proof:</div>
-                <Link target={"_blank"} href={user.individual?.address || ""}>
-                  {user.individual?.address || ""}
-                </Link>
-              </div>
-              {user.individual?.role === "HEALTHCARE" && (
-                <div className="flex flex-row gap-2">
-                  <div className="font-medium text-white">Health License:</div>
-                  <Link
-                    target={"_blank"}
-                    href={user.individual?.healthLicense || ""}
-                  >
-                    {user.individual?.healthLicense || ""}
-                  </Link>
-                </div>
-              )}
-            </>
-          ) : (
-            <></>
-          )}
-          {user.type === "ORGANIZATION" || user.type === "ORGANISATION" ? (
-            <>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Type:</div>
-                <div>{user.organisation?.role}</div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Images:</div>
-                <div>
-                  {user.organisation.imageFileDetails.map((image: any) => (
-                    <>
-                      <Link key={image.fileId} href={image.url}>
-                        {image.url}
-                      </Link>
-                      <br />
-                    </>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">License:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.license.url || ""}
-                >
-                  {user.organisation?.license.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Permit:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.permit.url || ""}
-                >
-                  {user.organisation?.permit.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Address:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.addressProof.url || ""}
-                >
-                  {user.organisation?.addressProof.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Phone:</div>
-                <div>{user.organisation?.phone}</div>
-              </div>
-            </>
-          ) : (
-            <></>
-          )}
-        </div>
-      </Layout>
-    );
-  }
-  if (user.status === "APPROVED") {
-    return (
-      <Layout title={"userId"}>
-        <div className="m-12 flex flex-col items-start gap-2 rounded-2xl border-2 border-green-100 bg-green-700 p-6 text-indigo-300">
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Name:</div>
-            <div>{user.name}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Email:</div>
-            <div>{user.email}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Status:</div>
-            <div>{user.status}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Type:</div>
-            <div>{user.type}</div>
-          </div>
-          {user.type === "INDIVIDUAL" ? (
-            <>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Role:</div>
-                <div>{user.individual?.role}</div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image:</div>
-                <Link target={"_blank"} href={user.individual?.image || ""}>
-                  {user.individual?.image || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Identity Proof:</div>
-                <Link target={"_blank"} href={user.individual?.identity || ""}>
-                  {user.individual?.identity || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Address Proof:</div>
-                <Link target={"_blank"} href={user.individual?.address || ""}>
-                  {user.individual?.address || ""}
-                </Link>
-              </div>
-              {user.individual?.role === "HEALTHCARE" && (
-                <div className="flex flex-row gap-2">
-                  <div className="font-medium text-white">Health License:</div>
-                  <Link
-                    target={"_blank"}
-                    href={user.individual?.healthLicense || ""}
-                  >
-                    {user.individual?.healthLicense || ""}
-                  </Link>
-                </div>
-              )}
-            </>
-          ) : (
-            <></>
-          )}
-          {user.type === "ORGANIZATION" || user.type === "ORGANISATION" ? (
-            <>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Type:</div>
-                <div>{user.organisation?.role}</div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Images:</div>
-                <div>
-                  {user.organisation.imageFileDetails.map((image: any) => (
-                    <>
-                      <Link key={image.fileId} href={image.url}>
-                        {image.url}
-                      </Link>
-                      <br />
-                    </>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">License:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.license.url || ""}
-                >
-                  {user.organisation?.license.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Permit:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.permit.url || ""}
-                >
-                  {user.organisation?.permit.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Address:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.addressProof.url || ""}
-                >
-                  {user.organisation?.addressProof.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Phone:</div>
-                <div>{user.organisation?.phone}</div>
-              </div>
-            </>
-          ) : (
-            <></>
-          )}
-        </div>
-      </Layout>
-    );
-  }
-  if (user.status === "REJECTED") {
-    return (
-      <Layout title={"userId"}>
-        <div className="m-12 flex flex-col gap-2 rounded-2xl border-2 border-red-100 bg-red-700 p-6 text-indigo-300">
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Name:</div>
-            <div>{user.name}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Email:</div>
-            <div>{user.email}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Status:</div>
-            <div>{user.status}</div>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="font-medium text-white">Type:</div>
-            <div>{user.type}</div>
-          </div>
-          {user.type === "INDIVIDUAL" ? (
-            <>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Role:</div>
-                <div>{user.individual?.role}</div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Image:</div>
-                <Link target={"_blank"} href={user.individual?.image || ""}>
-                  {user.individual?.image || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Identity Proof:</div>
-                <Link target={"_blank"} href={user.individual?.identity || ""}>
-                  {user.individual?.identity || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Address Proof:</div>
-                <Link target={"_blank"} href={user.individual?.address || ""}>
-                  {user.individual?.address || ""}
-                </Link>
-              </div>
-              {user.individual?.role === "HEALTHCARE" && (
-                <div className="flex flex-row gap-2">
-                  <div className="font-medium text-white">Health License:</div>
-                  <Link
-                    target={"_blank"}
-                    href={user.individual?.healthLicense || ""}
-                  >
-                    {user.individual?.healthLicense || ""}
-                  </Link>
-                </div>
-              )}
-            </>
-          ) : (
-            <></>
-          )}
-          {user.type === "ORGANIZATION" || user.type === "ORGANISATION" ? (
-            <>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Type:</div>
-                <div>{user.organisation?.role}</div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Images:</div>
-                <div>
-                  {user.organisation.imageFileDetails.map((image: any) => (
-                    <>
-                      <Link key={image.fileId} href={image.url}>
-                        {image.url}
-                      </Link>
-                      <br />
-                    </>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">License:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.license.url || ""}
-                >
-                  {user.organisation?.license.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Permit:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.permit.url || ""}
-                >
-                  {user.organisation?.permit.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Address:</div>
-                <Link
-                  target={"_blank"}
-                  href={user.organisation?.addressProof.url || ""}
-                >
-                  {user.organisation?.addressProof.url || ""}
-                </Link>
-              </div>
-              <div className="flex flex-row gap-2">
-                <div className="font-medium text-white">Phone:</div>
-                <div>{user.organisation?.phone}</div>
-              </div>
-            </>
-          ) : (
-            <></>
-          )}
-        </div>
-      </Layout>
-    );
-  }
   return <></>;
 };
 

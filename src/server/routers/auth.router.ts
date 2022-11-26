@@ -2,13 +2,13 @@ import { hash } from "argon2";
 import * as trpc from "@trpc/server";
 
 import { publicProcedure, router } from "@/server/trpc";
-import { orgSignUpSchema, signUpSchema } from "@/utils/validation/auth";
+import { orgOTPSignUpSchema, signUpOTPSchema } from "@/utils/validation/auth";
 
 export const authRouter = router({
-  registerUser: publicProcedure.input(signUpSchema).mutation(async (req) => {
+  registerUser: publicProcedure.input(signUpOTPSchema).mutation(async (req) => {
     const { input, ctx } = req;
     const { fname, lname, email, password, otp } =
-      await signUpSchema.parseAsync(input);
+      await signUpOTPSchema.parseAsync(input);
 
     const exists = await ctx.prisma.oneTimeToken.findFirst({
       where: {
@@ -94,79 +94,81 @@ export const authRouter = router({
       });
     }
   }),
-  registerOrg: publicProcedure.input(orgSignUpSchema).mutation(async (req) => {
-    const { input, ctx } = req;
-    // const {email, password, username} = await signUpSchema.parseAsync(input);
-    const { name, description, email, password, otp } = input;
+  registerOrg: publicProcedure
+    .input(orgOTPSignUpSchema)
+    .mutation(async (req) => {
+      const { input, ctx } = req;
+      // const {email, password, username} = await signUpSchema.parseAsync(input);
+      const { name, description, email, password, otp } = input;
 
-    const exists = await ctx.prisma.oneTimeToken.findFirst({
-      where: {
-        otp,
-        userEmail: email,
-      },
-      include: {
-        user: true,
-      },
-    });
-
-    if (!exists) {
-      throw new trpc.TRPCError({
-        code: "NOT_FOUND",
-        message: "Invalid OTP",
+      const exists = await ctx.prisma.oneTimeToken.findFirst({
+        where: {
+          otp,
+          userEmail: email,
+        },
+        include: {
+          user: true,
+        },
       });
-    }
 
-    if (exists.expiresAt < new Date()) {
-      throw new trpc.TRPCError({
-        code: "NOT_FOUND",
-        message: "OTP expired. Try again.",
+      if (!exists) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "Invalid OTP",
+        });
+      }
+
+      if (exists.expiresAt < new Date()) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "OTP expired. Try again.",
+        });
+      }
+
+      // delete otp from db
+      await ctx.prisma.oneTimeToken.delete({
+        where: { id: exists.id },
       });
-    }
 
-    // delete otp from db
-    await ctx.prisma.oneTimeToken.delete({
-      where: { id: exists.id },
-    });
-
-    const oexists = await ctx.prisma.user.findFirst({
-      where: { email },
-    });
-
-    if (oexists) {
-      throw new trpc.TRPCError({
-        code: "CONFLICT",
-        message: "User already exists.",
+      const oexists = await ctx.prisma.user.findFirst({
+        where: { email },
       });
-    }
 
-    const hashedPassword = await hash(password);
+      if (oexists) {
+        throw new trpc.TRPCError({
+          code: "CONFLICT",
+          message: "User already exists.",
+        });
+      }
 
-    const org = await ctx.prisma.organisation.create({
-      data: {
-        description,
-      },
-    });
+      const hashedPassword = await hash(password);
 
-    const result = await ctx.prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        type: "ORGANISATION",
-        organisation: {
-          connect: {
-            id: org.id,
+      const org = await ctx.prisma.organisation.create({
+        data: {
+          description,
+        },
+      });
+
+      const result = await ctx.prisma.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword,
+          type: "ORGANISATION",
+          organisation: {
+            connect: {
+              id: org.id,
+            },
           },
         },
-      },
-    });
+      });
 
-    return {
-      status: 201,
-      message: "Account created successfully",
-      result: result.email,
-    };
-  }),
+      return {
+        status: 201,
+        message: "Account created successfully",
+        result: result.email,
+      };
+    }),
   me: publicProcedure.query(async (req) => {
     const { ctx } = req;
 

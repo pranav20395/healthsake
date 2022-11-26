@@ -33,6 +33,14 @@ const isAdmin = t.middleware(async ({ ctx, next }) => {
 const adminProcedure = publicProcedure.use(isAdmin);
 
 export const adminRouter = router({
+  getLogs: adminProcedure.query(async (req) => {
+    return req.ctx.prisma.log.findMany({
+      orderBy: {
+        timestamp: "desc",
+      },
+      take: 200,
+    });
+  }),
   allUsersPendingVerification: adminProcedure.query(async (req) => {
     const { ctx } = req;
 

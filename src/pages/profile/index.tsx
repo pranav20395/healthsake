@@ -1,10 +1,18 @@
 import type { NextPage } from "next";
 import Layout from "../../client/Layout";
-import React from "react";
 import { useUserContext } from "@/context/user.context";
 import { useRouter } from "next/router";
 import { trpc } from "@/utils/trpc";
 import Link from "next/link";
+import { FC } from "react";
+
+const Customlink: FC<{ href: string }> = ({ href }) => {
+  return (
+    <Link href={href}>
+      <span className="cursor-pointer text-lg text-indigo-600">{href}</span>
+    </Link>
+  );
+};
 
 const Profile: NextPage = () => {
   const router = useRouter();
@@ -36,23 +44,25 @@ const Profile: NextPage = () => {
               <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
                 Email: {data.result.email}
               </div>
-              <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
-                Role: {data.result.type}
-              </div>
               {data.result.indID ? (
                 <>
                   <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
-                    Image: {data.result.individual.image}
+                    Image:{" "}
+                    <Customlink href={data.result.individual.image.url} />
                   </div>
                   <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
-                    Identity: {data.result.individual.identity}
+                    Identity:{" "}
+                    <Customlink href={data.result.individual.identity.url} />
                   </div>
                   <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
-                    Address: {data.result.individual.address}
+                    Address:
+                    <Customlink href={data.result.individual.address.url} />
                   </div>
+
                   {data.result.individual?.healthLicense ? (
                     <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
-                      Health License: {data.result.individual.healthLicense}
+                      Health License:{" "}
+                      <Customlink href={data.result.individual.license.url} />
                     </div>
                   ) : null}
                 </>
@@ -64,11 +74,7 @@ const Profile: NextPage = () => {
                     {data.result.updatedOrg.imageFileDetails.map(
                       (image: any) => (
                         <>
-                          <Link key={image.fileId} href={image.url}>
-                            <span className="cursor-pointer text-lg text-indigo-600">
-                              {image.url}
-                            </span>
-                          </Link>
+                          <Customlink href={image.url} key={image.fileId} />
                           <br />
                         </>
                       )
@@ -76,27 +82,17 @@ const Profile: NextPage = () => {
                   </div>
                   <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
                     Address:{" "}
-                    <Link href={data.result.updatedOrg.addressProof.url}>
-                      <span className="cursor-pointer text-lg text-indigo-600">
-                        {data.result.updatedOrg.addressProof.url}
-                      </span>
-                    </Link>
+                    <Customlink
+                      href={data.result.updatedOrg.addressProof.url}
+                    />
                   </div>
                   <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
                     License:{" "}
-                    <Link href={data.result.updatedOrg.license.url}>
-                      <span className="cursor-pointer text-lg text-indigo-600">
-                        {data.result.updatedOrg.license.url}
-                      </span>
-                    </Link>
+                    <Customlink href={data.result.updatedOrg.license.url} />
                   </div>
                   <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
                     Permit:{" "}
-                    <Link href={data.result.updatedOrg.permit.url}>
-                      <span className="cursor-pointer text-lg text-indigo-600">
-                        {data.result.updatedOrg.permit.url}
-                      </span>
-                    </Link>
+                    <Customlink href={data.result.updatedOrg.permit.url} />
                   </div>
                   <div className="mb-8 w-full border-b-2 border-b-gray-500 pb-4">
                     Phone: {data.result.updatedOrg.phone}

@@ -62,20 +62,151 @@ export const userRouter = router({
       }
 
       if (user.type === "INDIVIDUAL" && user.indID) {
-        const individual = await ctx.prisma.individual.findUnique({
+        const ind = await ctx.prisma.individual.findUnique({
           where: {
             id: user.indID,
           },
         });
 
+        if (!ind) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "Individual not found",
+          });
+        }
+
         const { password, ...userDetails } = user;
+
+        let address = await ctx.prisma.addressProof.findUnique({
+          where: {
+            id: ind.addressId!,
+          },
+        });
+
+        if (!address) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
+
+        const addrFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: address.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
+
+        address = {
+          ...address,
+          ...addrFileDetails,
+        };
+
+        let identity = await ctx.prisma.identityProof.findUnique({
+          where: {
+            id: ind.identityId!,
+          },
+        });
+
+        if (!identity) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
+
+        const identityFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: identity.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
+
+        identity = {
+          ...identity,
+          ...identityFileDetails,
+        };
+
+        let license: any = {};
+
+        if (ind.licenseId) {
+          license = await ctx.prisma.license.findUnique({
+            where: {
+              id: ind.licenseId!,
+            },
+          });
+
+          if (!license) {
+            throw new trpc.TRPCError({
+              code: "NOT_FOUND",
+              message: "User not found",
+            });
+          }
+
+          const licenseFileDetails = await ctx.prisma.fileStorage.findUnique({
+            where: {
+              id: license.fileId,
+            },
+            select: {
+              ownerId: true,
+              url: true,
+            },
+          });
+
+          license = {
+            ...license,
+            ...licenseFileDetails,
+          };
+        }
+
+        let img = await ctx.prisma.image.findUnique({
+          where: {
+            id: ind.imageId!,
+          },
+        });
+
+        if (!img) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
+
+        const imgFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: img.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
+
+        img = {
+          ...img,
+          ...imgFileDetails,
+        };
+
+        const updatedInd = {
+          ...ind,
+          address: address,
+          identity: identity,
+          license,
+          image: img,
+        };
 
         return {
           status: 200,
           message: "User found",
           result: {
             ...userDetails,
-            individual,
+            individual: updatedInd,
           },
         };
       }
@@ -266,12 +397,136 @@ export const userRouter = router({
           });
         }
 
+        let address = await ctx.prisma.addressProof.findUnique({
+          where: {
+            id: ind.addressId!,
+          },
+        });
+
+        if (!address) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
+
+        const addrFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: address.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
+
+        address = {
+          ...address,
+          ...addrFileDetails,
+        };
+
+        let identity = await ctx.prisma.identityProof.findUnique({
+          where: {
+            id: ind.identityId!,
+          },
+        });
+
+        if (!identity) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
+
+        const identityFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: identity.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
+
+        identity = {
+          ...identity,
+          ...identityFileDetails,
+        };
+
+        let license: any = {};
+
+        if (ind.licenseId) {
+          license = await ctx.prisma.license.findUnique({
+            where: {
+              id: ind.licenseId!,
+            },
+          });
+
+          if (!license) {
+            throw new trpc.TRPCError({
+              code: "NOT_FOUND",
+              message: "User not found",
+            });
+          }
+
+          const licenseFileDetails = await ctx.prisma.fileStorage.findUnique({
+            where: {
+              id: license.fileId,
+            },
+            select: {
+              ownerId: true,
+              url: true,
+            },
+          });
+
+          license = {
+            ...license,
+            ...licenseFileDetails,
+          };
+        }
+
+        let img = await ctx.prisma.image.findUnique({
+          where: {
+            id: ind.imageId!,
+          },
+        });
+
+        if (!img) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found",
+          });
+        }
+
+        const imgFileDetails = await ctx.prisma.fileStorage.findUnique({
+          where: {
+            id: img.fileId,
+          },
+          select: {
+            ownerId: true,
+            url: true,
+          },
+        });
+
+        img = {
+          ...img,
+          ...imgFileDetails,
+        };
+
+        const updatedInd = {
+          ...ind,
+          address: address,
+          identity: identity,
+          license,
+          image: img,
+        };
+
         return {
           status: 200,
           message: "User found",
           result: {
             ...user,
-            individual: ind,
+            individual: updatedInd,
           },
         };
       } else if (

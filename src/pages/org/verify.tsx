@@ -19,7 +19,7 @@ const Register: NextPage = () => {
     router.push("/");
   }
 
-  const { data, isLoading, error } = trpc.user.profile.useQuery();
+  const { data, isLoading, error } = trpc.authedUsers.basicDetails.useQuery();
 
   if (
     data &&
@@ -40,13 +40,16 @@ const Register: NextPage = () => {
 
   const didSubmit = data?.result.status !== "CREATED";
 
-  const logout = trpc.authedUsers.logout.useMutation();
+  const logout = trpc.authedUsers.logout.useMutation({
+    onSuccess: () => {
+      router.reload();
+      router.push("/");
+    },
+  });
 
   const toLogout = useCallback(async () => {
-    logout.mutate();
-    router.reload();
-    await router.push("/");
-  }, [logout, router]);
+    logout.mutateAsync();
+  }, [logout]);
 
   const {
     register,

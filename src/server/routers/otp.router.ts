@@ -181,7 +181,7 @@ export const otpRouter = router({
         if (!exists) {
           throw new trpc.TRPCError({
             code: "NOT_FOUND",
-            message: "Invalid OTP",
+            message: "Invalid OTP/User not Found",
           });
         }
 

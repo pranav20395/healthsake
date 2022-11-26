@@ -135,3 +135,11 @@ model ReadAccessUsers {
   file      FileStorage @relation(fields: [fileId], references: [id], onDelete: Cascade)
   createdAt DateTime    @default(now())
 }
+
+model Log {
+  id        String   @id @default(cuid())
+  type      String
+  action    String
+  value     String
+  timestamp DateTime @default(now())
+}

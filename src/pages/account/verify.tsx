@@ -24,7 +24,7 @@ const Register: NextPage = () => {
     router.push("/");
   }
 
-  const { data, isLoading, error } = trpc.user.profile.useQuery();
+  const { data, isLoading, error } = trpc.authedUsers.basicDetails.useQuery();
 
   if (data && data.result.type !== "INDIVIDUAL") {
     router.push("/");
@@ -41,13 +41,16 @@ const Register: NextPage = () => {
 
   const didSubmit = data?.result.status !== "CREATED";
 
-  const logout = trpc.authedUsers.logout.useMutation();
+  const logout = trpc.authedUsers.logout.useMutation({
+    onSuccess: () => {
+      router.reload();
+      router.push("/");
+    },
+  });
 
-  const toLogout = useCallback(async () => {
-    logout.mutate();
-    router.reload();
-    await router.push("/");
-  }, [logout, router]);
+  const toLogout = useCallback(() => {
+    logout.mutateAsync();
+  }, [logout]);
 
   const [isHealthCare, setIsHealthCare] = useState<boolean>(true);
 
@@ -106,7 +109,7 @@ const Register: NextPage = () => {
         const hl = await uploadFile(formData);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        urlData["healthLicense"] = hl.url;
+        urlData["healthLicense"] = hl;
       }
       console.log(urlData);
       // await uploadFile(formData);

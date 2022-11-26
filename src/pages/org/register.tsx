@@ -9,6 +9,7 @@ import {
   orgSignUpSchema,
   OSignUp,
   otpFrontendVerifySchema,
+  OTPSignUp,
 } from "@/utils/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "@/utils/trpc";
@@ -24,7 +25,7 @@ function Register() {
   }
 
   const [otpEnv, setOtpEnv] = useState(false);
-  const [regData, setRegData] = useState<OSignUp>();
+  const [regData, setRegData] = useState<OTPSignUp>();
   const {
     register,
     handleSubmit,
@@ -67,7 +68,8 @@ function Register() {
   const onSubmit = useCallback(
     async (data: OSignUp) => {
       otpMutation.mutate({ email: data.email });
-      setRegData(data);
+      const newdata: OTPSignUp = { ...data, otp: "123456" };
+      setRegData(newdata);
     },
     [otpMutation]
   );
@@ -125,7 +127,7 @@ function Register() {
           </label>
           <button
             className="rounded-xl bg-indigo-600 p-3 px-8 text-sm transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
-            disabled={mutation.isLoading}
+            disabled={otpMutation.isLoading}
             type="submit"
           >
             Register

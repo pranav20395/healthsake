@@ -9,6 +9,7 @@ import IntroLayout from "../../client/Layout/intro";
 import {
   IOtpFrontendVerify,
   ISignUp,
+  ITPSignUp,
   otpFrontendVerifySchema,
   signUpSchema,
 } from "@/utils/validation/auth";
@@ -25,7 +26,7 @@ const Register: NextPage = () => {
   }
 
   const [otpEnv, setOtpEnv] = useState(false);
-  const [regData, setRegData] = useState<ISignUp>();
+  const [regData, setRegData] = useState<ITPSignUp>();
   const [loggingErrors, setLoggingErrors] = useState<string>("");
 
   const {
@@ -66,7 +67,8 @@ const Register: NextPage = () => {
   const onSubmit = useCallback(
     async (data: ISignUp) => {
       otpMutation.mutate({ email: data.email });
-      setRegData(data);
+      const newdata: ITPSignUp = { ...data, otp: "123456" };
+      setRegData(newdata);
     },
     [otpMutation]
   );
