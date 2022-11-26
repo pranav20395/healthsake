@@ -25,7 +25,7 @@ const Post = () => {
   });
 
   if (data) {
-    const user = data.result;
+    const user: any = data.result;
 
     if (ctxUser.type !== "ADMIN") {
       if (user.type === "INDIVIDUAL" && user.individual.role === "PATIENT") {

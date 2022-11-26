@@ -20,7 +20,7 @@ const FileName = () => {
   const fileLink = `/api/file?filename=${filename}`;
 
   return (
-    <Layout title={filename}>
+    <Layout title={filename.toString()}>
       <div className="flex h-screen items-center justify-around gap-10 px-16">
         <h1 className="w-1/2 text-lg font-bold">
           Filename: <span className="text-md font-normal">{filename}</span>

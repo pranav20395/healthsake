@@ -7,9 +7,9 @@ import {
 import { approvedUserProcedure } from "./user.router";
 
 export const fileRouter = router({
-  uploadFile: approvedUserProcedure
-    .input(fileUploadSchema)
-    .mutation(async (req) => {}),
+  // uploadFile: approvedUserProcedure
+  //   .input(fileUploadSchema)
+  //   .mutation(async (req) => {}),
   getDetails: approvedUserProcedure
     .input(fileGetDetailsSchema)
     .mutation(async (req) => {
