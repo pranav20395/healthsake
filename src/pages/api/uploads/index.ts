@@ -52,6 +52,10 @@ uploadFiles
           id: userFromReq.id,
         },
       });
+      if (!user || !user.id) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      }
       if (user) {
         req.userId = user.id;
         next();
@@ -66,6 +70,17 @@ uploadFiles
   .post(async (req, res) => {
     const { file, userId } = req;
     const { filename, mimetype } = file;
+    //check whether file is pdf or image, if not delete it and return error
+    if (
+      mimetype !== "application/pdf" &&
+      mimetype !== "image/png" &&
+      mimetype !== "image/jpeg" &&
+      mimetype !== "image/jpg" &&
+      mimetype !== "image/webp"
+    ) {
+      res.status(400).json({ error: `File type not supported` });
+    }
+
     const url = `${process.env.BASE_URL}file/` + filename;
 
     if (userId) {
