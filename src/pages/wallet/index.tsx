@@ -78,7 +78,8 @@ const Wallet: NextPage = () => {
       image: "https://svgshare.com/i/oMF.svg",
       order_id: data.id,
       handler: async function (response: any) {
-        saveDetails(data.amount / 100, data.receipt);
+        const amount = data.amount / 100;
+        saveDetails(amount, data.receipt);
       },
       prefill: {
         email: ctxUser.email,

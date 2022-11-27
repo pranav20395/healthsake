@@ -43,7 +43,7 @@ export default async function handler(
     const receiptUpload = await prisma.razorpayReceipts.create({
       data: {
         receipt: receipt,
-        amount: Number(amount),
+        amount: Number(amount.slice(0, -2)),
         user: {
           connect: {
             id: user.id,
