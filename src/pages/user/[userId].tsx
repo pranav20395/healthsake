@@ -41,7 +41,7 @@ const Post = () => {
       <Layout title={"userId"}>
         <div className=" relative h-60 w-full object-cover">
           <Image
-            src="https://random.imagecdn.app/1500/300"
+            src={`https://picsum.photos/seed/${userId}/1500/300`}
             alt="cover photo"
             layout="fill"
           />
@@ -118,6 +118,7 @@ const Post = () => {
           )}
           {user.type === "ORGANIZATION" || user.type === "ORGANISATION" ? (
             <>
+              {user.organisation?.description}
               <div className="flex flex-row gap-2">
                 <div className="rounded-full bg-purple-500 px-2 text-sm font-bold lowercase text-white">
                   {user.organisation?.role}

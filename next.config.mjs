@@ -25,8 +25,8 @@ export default defineNextConfig({
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "random.imagecdn.app",
-        pathname: "/1500/300",
+        hostname: "picsum.photos",
+        pathname: "/seed/*/1500/300",
       },
     ],
   },
