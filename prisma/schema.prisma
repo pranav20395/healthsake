@@ -7,6 +7,11 @@ generator client {
   // output   = "../ERD.svg"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
+}
+
 datasource db {
   provider = "postgresql"
   // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
@@ -17,30 +22,32 @@ datasource db {
 }
 
 model User {
-  id                   String             @id @default(cuid())
-  name                 String
-  email                String             @unique
-  password             String
-  userVerified         Boolean            @default(false)
-  status               String             @default("CREATED")
-  type                 String             @default("INDIVIDUAL")
-  indID                String?
-  individual           Individual?        @relation(fields: [indID], references: [id])
-  orgId                String?
-  organisation         Organisation?      @relation(fields: [orgId], references: [id])
-  OneTimeToken         OneTimeToken[]
-  FileStorage          FileStorage[]
-  ReadAccessUsers      ReadAccessUsers[]
-  patientPrescription  Prescription[]     @relation("patient")
-  doctorPrescription   Prescription[]     @relation("doctor")
-  patientBill          Bill[]             @relation("patient")
-  Bill                 Bill[]             @relation("organisation")
-  patientInsuranceLogs InsuranceLogs[]    @relation("patient")
-  InsuranceLogs        InsuranceLogs[]    @relation("insurance")
-  wallet               Wallet?            @relation(fields: [walletId], references: [id])
-  walletId             String?
-  RazorpayReceipts     RazorpayReceipts[]
-  Pharmacy             Pharmacy[]
+  id                        String               @id @default(cuid())
+  name                      String
+  email                     String               @unique
+  password                  String
+  userVerified              Boolean              @default(false)
+  status                    String               @default("CREATED")
+  type                      String               @default("INDIVIDUAL")
+  indID                     String?
+  individual                Individual?          @relation(fields: [indID], references: [id])
+  orgId                     String?
+  organisation              Organisation?        @relation(fields: [orgId], references: [id])
+  OneTimeToken              OneTimeToken[]
+  FileStorage               FileStorage[]
+  ReadAccessUsers           ReadAccessUsers[]
+  patientPrescription       Prescription[]       @relation("patient")
+  doctorPrescription        Prescription[]       @relation("doctor")
+  patientBill               Bill[]               @relation("patient")
+  Bill                      Bill[]               @relation("organisation")
+  patientInsuranceLogs      InsuranceLogs[]      @relation("patient")
+  InsuranceLogs             InsuranceLogs[]      @relation("insurance")
+  wallet                    Wallet?              @relation(fields: [walletId], references: [id])
+  walletId                  String?
+  RazorpayReceipts          RazorpayReceipts[]
+  Pharmacy                  Pharmacy[]
+  patientConsulationRequest ConsulationRequest[] @relation("patient")
+  ConsulationRequest        ConsulationRequest[] @relation("doctor")
 }
 
 // enum UserStatus {
@@ -136,14 +143,15 @@ model Permit {
 }
 
 model Prescription {
-  id        String      @id @default(cuid())
-  fileId    String
-  file      FileStorage @relation(fields: [fileId], references: [id])
-  patientId String
-  patient   User        @relation("patient", fields: [patientId], references: [id])
-  doctorId  String
-  doctor    User        @relation("doctor", fields: [doctorId], references: [id])
-  Bill      Bill[]
+  id                 String               @id @default(cuid())
+  fileId             String
+  file               FileStorage          @relation(fields: [fileId], references: [id])
+  patientId          String
+  patient            User                 @relation("patient", fields: [patientId], references: [id])
+  doctorId           String
+  doctor             User                 @relation("doctor", fields: [doctorId], references: [id])
+  Bill               Bill[]
+  ConsulationRequest ConsulationRequest[]
 }
 
 model Bill {
@@ -266,4 +274,16 @@ model Medicine {
   quantity   Int
   pharmacyId String
   pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id])
+}
+
+model ConsulationRequest {
+  id             String        @id @default(cuid())
+  patientId      String
+  patient        User          @relation("patient", fields: [patientId], references: [id])
+  doctorId       String
+  doctor         User          @relation("doctor", fields: [doctorId], references: [id])
+  status         String        @default("PENDING")
+  prescriptionId String?
+  prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
+  timestamp      DateTime      @default(now())
 }
