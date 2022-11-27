@@ -40,6 +40,7 @@ model User {
   wallet               Wallet?            @relation(fields: [walletId], references: [id])
   walletId             String?
   RazorpayReceipts     RazorpayReceipts[]
+  Pharmacy             Pharmacy[]
 }
 
 // enum UserStatus {
@@ -248,4 +249,21 @@ model RazorpayReceipts {
   user      User     @relation(fields: [userId], references: [id])
   amount    Int
   timestamp DateTime @default(now())
+}
+
+model Pharmacy {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
+  medicines Medicine[]
+}
+
+model Medicine {
+  id         String   @id @default(cuid())
+  image      String
+  name       String
+  price      Int
+  quantity   Int
+  pharmacyId String
+  pharmacy   Pharmacy @relation(fields: [pharmacyId], references: [id])
 }

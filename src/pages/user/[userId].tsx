@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useUserContext } from "@/context/user.context";
 import Image from "next/image";
 
-const Post = () => {
+const UserPage = () => {
   const router = useRouter();
   const ctxUser = useUserContext();
 
@@ -184,4 +184,4 @@ const Post = () => {
   return <></>;
 };
 
-export default Post;
+export default UserPage;

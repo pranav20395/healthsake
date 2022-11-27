@@ -4,6 +4,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 import path from "path";
 import { getUserFromCookie } from "@/server/context";
 import { prisma } from "@/db/prisma";
+import * as crypto from "crypto";
+import * as fs from "fs";
 
 export const config = {
   api: {
@@ -81,6 +83,13 @@ uploadFiles
       res.status(400).json({ error: `File type not supported` });
     }
 
+    const buffer = fs.readFileSync(file.path);
+    const hashSum = crypto.createHash("sha256");
+
+    hashSum.update(buffer);
+
+    const hex = hashSum.digest("hex");
+
     const url = `${process.env.BASE_URL}file/` + filename;
 
     if (userId) {
@@ -90,6 +99,7 @@ uploadFiles
         ownerId: userId,
         size: file.size,
         path: file.path,
+        hash: hex,
       });
     } else {
       res.status(401).json({ error: `Not authenticated` });

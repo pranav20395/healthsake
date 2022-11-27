@@ -429,6 +429,25 @@ export const verifyRouter = router({
         },
       });
 
+      if (role === "PHARMACY") {
+        const pharm = await ctx.prisma.pharmacy.create({
+          data: {
+            user: {
+              connect: {
+                id: ctx.user.id,
+              },
+            },
+          },
+        });
+
+        if (!pharm) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "Something went wrong",
+          });
+        }
+      }
+
       return {
         status: 200,
         message: "Organisation created successfully",
