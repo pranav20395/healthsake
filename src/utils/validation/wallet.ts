@@ -8,4 +8,5 @@ export const spendWallet = z.object({
 
 export const topUpWallet = z.object({
   amount: z.number().min(1, "Amount must be greater than 0"),
+  receipt: z.string(),
 });

@@ -173,7 +173,7 @@ export const walletRouter = router({
   }),
   topUpWallet: authedProcedure.input(topUpWallet).mutation(async (req) => {
     const { ctx, input } = req;
-    const { amount } = await topUpWallet.parseAsync(input);
+    const { amount, receipt } = await topUpWallet.parseAsync(input);
     const user = await ctx.prisma.user.findUnique({
       where: {
         id: ctx.user.id,
@@ -187,6 +187,33 @@ export const walletRouter = router({
       throw new trpc.TRPCError({
         code: "NOT_FOUND",
         message: "User not found",
+      });
+    }
+
+    const razorpayReceipt = await ctx.prisma.razorpayReceipts.findUnique({
+      where: {
+        receipt,
+      },
+    });
+
+    if (!razorpayReceipt) {
+      throw new trpc.TRPCError({
+        code: "BAD_REQUEST",
+        message: "Invalid receipt",
+      });
+    }
+
+    if (razorpayReceipt.amount !== amount) {
+      throw new trpc.TRPCError({
+        code: "BAD_REQUEST",
+        message: "Invalid receipt",
+      });
+    }
+
+    if (razorpayReceipt.userId !== user.id) {
+      throw new trpc.TRPCError({
+        code: "BAD_REQUEST",
+        message: "Invalid receipt",
       });
     }
 

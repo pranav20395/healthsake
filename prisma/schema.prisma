@@ -17,28 +17,29 @@ datasource db {
 }
 
 model User {
-  id                   String            @id @default(cuid())
+  id                   String             @id @default(cuid())
   name                 String
-  email                String            @unique
+  email                String             @unique
   password             String
-  userVerified         Boolean           @default(false)
-  status               String            @default("CREATED")
-  type                 String            @default("INDIVIDUAL")
+  userVerified         Boolean            @default(false)
+  status               String             @default("CREATED")
+  type                 String             @default("INDIVIDUAL")
   indID                String?
-  individual           Individual?       @relation(fields: [indID], references: [id])
+  individual           Individual?        @relation(fields: [indID], references: [id])
   orgId                String?
-  organisation         Organisation?     @relation(fields: [orgId], references: [id])
+  organisation         Organisation?      @relation(fields: [orgId], references: [id])
   OneTimeToken         OneTimeToken[]
   FileStorage          FileStorage[]
   ReadAccessUsers      ReadAccessUsers[]
-  patientPrescription  Prescription[]    @relation("patient")
-  doctorPrescription   Prescription[]    @relation("doctor")
-  patientBill          Bill[]            @relation("patient")
-  Bill                 Bill[]            @relation("organisation")
-  patientInsuranceLogs InsuranceLogs[]   @relation("patient")
-  InsuranceLogs        InsuranceLogs[]   @relation("insurance")
-  wallet               Wallet?           @relation(fields: [walletId], references: [id])
+  patientPrescription  Prescription[]     @relation("patient")
+  doctorPrescription   Prescription[]     @relation("doctor")
+  patientBill          Bill[]             @relation("patient")
+  Bill                 Bill[]             @relation("organisation")
+  patientInsuranceLogs InsuranceLogs[]    @relation("patient")
+  InsuranceLogs        InsuranceLogs[]    @relation("insurance")
+  wallet               Wallet?            @relation(fields: [walletId], references: [id])
   walletId             String?
+  RazorpayReceipts     RazorpayReceipts[]
 }
 
 // enum UserStatus {
@@ -238,4 +239,13 @@ model Transaction {
   sendWalletId  String
   sendWallet    Wallet          @relation("Transaction", fields: [sendWalletId], references: [id])
   InsuranceLogs InsuranceLogs[]
+}
+
+model RazorpayReceipts {
+  id        String   @id @default(cuid())
+  receipt   String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  timestamp DateTime @default(now())
 }

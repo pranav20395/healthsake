@@ -78,7 +78,7 @@ const Wallet: NextPage = () => {
       image: "https://svgshare.com/i/oMF.svg",
       order_id: data.id,
       handler: async function (response: any) {
-        saveDetails(data.amount / 100);
+        saveDetails(data.amount / 100, data.receipt);
       },
       prefill: {
         email: ctxUser.email,
@@ -93,9 +93,10 @@ const Wallet: NextPage = () => {
     paymentObject.open();
   };
 
-  const saveDetails = async (amount: number) => {
+  const saveDetails = async (amount: number, receipt: string) => {
     topUpMutation.mutateAsync({
       amount,
+      receipt,
     });
   };
 

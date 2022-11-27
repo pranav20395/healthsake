@@ -47,7 +47,7 @@ const Register: NextPage = () => {
     },
   });
 
-  const toLogout = useCallback(async () => {
+  const toLogout = useCallback(() => {
     logout.mutateAsync();
   }, [logout]);
 
