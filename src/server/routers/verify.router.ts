@@ -212,6 +212,7 @@ export const verifyRouter = router({
                     type: address.type,
                     size: address.size,
                     url: address.url,
+                    isPublic: true,
                     owner: {
                       connect: {
                         id: admin?.id,
@@ -238,6 +239,7 @@ export const verifyRouter = router({
                     type: identity.type,
                     size: identity.size,
                     url: identity.url,
+                    isPublic: true,
                     owner: {
                       connect: {
                         id: admin?.id,
@@ -265,6 +267,7 @@ export const verifyRouter = router({
                     type: profileImage.type,
                     size: profileImage.size,
                     url: profileImage.url,
+                    isPublic: true,
                     owner: {
                       connect: {
                         id: profileImage.ownerId,
@@ -291,6 +294,7 @@ export const verifyRouter = router({
                     type: healthLicense.type,
                     size: healthLicense.size,
                     url: healthLicense.url,
+                    isPublic: true,
                     owner: {
                       connect: {
                         id: admin?.id,
@@ -395,6 +399,7 @@ export const verifyRouter = router({
                     type: image1.type,
                     size: image1.size,
                     url: image1.url,
+                    isPublic: true,
                     owner: {
                       connect: {
                         id: ctx.user.id,
@@ -410,6 +415,7 @@ export const verifyRouter = router({
                     type: image2.type,
                     size: image2.size,
                     url: image2.url,
+                    isPublic: true,
                     owner: {
                       connect: {
                         id: ctx.user.id,
@@ -428,6 +434,7 @@ export const verifyRouter = router({
                   type: address.type,
                   size: address.size,
                   url: address.url,
+                  isPublic: true,
                   owner: {
                     connect: {
                       id: admin?.id,
@@ -445,6 +452,7 @@ export const verifyRouter = router({
                   type: permit.type,
                   size: permit.size,
                   url: permit.url,
+                  isPublic: true,
                   owner: {
                     connect: {
                       id: admin?.id,
@@ -462,6 +470,7 @@ export const verifyRouter = router({
                   type: license.type,
                   size: license.size,
                   url: license.url,
+                  isPublic: true,
                   owner: {
                     connect: {
                       id: admin?.id,

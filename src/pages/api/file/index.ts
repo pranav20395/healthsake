@@ -37,7 +37,7 @@ const fileServe = async (
         return;
       }
 
-      if (fileObj.ownerId !== user.id) {
+      if (fileObj.isPublic === false && fileObj.ownerId !== user.id) {
         const readAccessUsers = await prisma.readAccessUsers.findMany({
           where: {
             fileId: fileObj.id,

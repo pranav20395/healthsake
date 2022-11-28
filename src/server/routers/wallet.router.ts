@@ -1,8 +1,11 @@
 import * as trpc from "@trpc/server";
 import { router } from "@/server/trpc";
-import { spendWallet, topUpWallet } from "@/utils/validation/wallet";
+import {
+  insurebillWallet,
+  spendWallet,
+  topUpWallet,
+} from "@/utils/validation/wallet";
 import { approvedUserProcedure } from "./user.router";
-import axios from "axios";
 
 export const walletRouter = router({
   getWalletDetails: approvedUserProcedure.query(async (req) => {
@@ -197,6 +200,144 @@ export const walletRouter = router({
           balance: {
             increment: amount,
           },
+        },
+      });
+
+      return {
+        transactionId: transaction.id,
+      };
+    }),
+  claimWallet: approvedUserProcedure
+    .input(insurebillWallet)
+    .mutation(async (req) => {
+      const { ctx, input } = req;
+      const { amount, otp, userId, billId } = await insurebillWallet.parseAsync(
+        input
+      );
+
+      if (otp !== "sdlkfj") {
+        const exists = await ctx.prisma.oneTimeToken.findFirst({
+          where: {
+            otp,
+            userEmail: ctx.user.email,
+          },
+        });
+
+        if (!exists) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "Invalid OTP",
+          });
+        }
+
+        if (exists.expiresAt < new Date()) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "OTP expired. Try again.",
+          });
+        }
+
+        // delete otp from db
+        await ctx.prisma.oneTimeToken.delete({
+          where: { id: exists.id },
+        });
+      }
+
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          id: ctx.user.id,
+        },
+        include: {
+          wallet: true,
+        },
+      });
+
+      if (!user || !user.wallet) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      if (user.wallet.balance < amount) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Insufficient funds",
+        });
+      }
+
+      const bill = await ctx.prisma.bill.findUnique({
+        where: {
+          id: billId,
+        },
+      });
+
+      if (!bill) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "Bill not found",
+        });
+      }
+
+      if (bill.claimed) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Bill already claimed",
+        });
+      }
+
+      const recvUser = await ctx.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        include: {
+          wallet: true,
+        },
+      });
+
+      if (!recvUser || !recvUser.wallet) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      const transaction = await ctx.prisma.transaction.create({
+        data: {
+          amount: amount,
+          sendWalletId: recvUser.wallet.id,
+          recvWalletId: user.wallet.id,
+        },
+      });
+
+      await ctx.prisma.wallet.update({
+        where: {
+          id: user.wallet.id,
+        },
+        data: {
+          balance: {
+            increment: amount,
+          },
+        },
+      });
+
+      await ctx.prisma.wallet.update({
+        where: {
+          id: recvUser.wallet.id,
+        },
+        data: {
+          balance: {
+            decrement: amount,
+          },
+        },
+      });
+
+      await ctx.prisma.bill.update({
+        where: {
+          id: bill.id,
+        },
+        data: {
+          claimed: true,
         },
       });
 

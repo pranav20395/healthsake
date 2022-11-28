@@ -1277,4 +1277,26 @@ export const patientRouter = router({
 
     return prescriptions;
   }),
+  getAllUnclaimedBills: patientProcedure.query(async (req) => {
+    const { ctx } = req;
+    const bills = await ctx.prisma.bill.findMany({
+      where: {
+        patientId: ctx.user.id,
+        claimed: false,
+      },
+      include: {
+        organisation: true,
+        file: true,
+      },
+    });
+
+    if (!bills) {
+      throw new trpc.TRPCError({
+        code: "BAD_REQUEST",
+        message: "Bills not found",
+      });
+    }
+
+    return bills;
+  }),
 });

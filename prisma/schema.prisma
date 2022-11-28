@@ -165,6 +165,7 @@ model Bill {
   organisation  User            @relation("organisation", fields: [orgId], references: [id])
   purpose       String          @default("CONSULTATION")
   transactionId String?
+  claimed       Boolean         @default(false)
   transaction   Transaction?    @relation(fields: [transactionId], references: [id])
   InsuranceLogs InsuranceLogs[]
   BillRequest   BillRequest[]
