@@ -1,8 +1,8 @@
 import { getUserFromCookie } from "@/server/context";
 import { NextApiRequest, NextApiResponse } from "next";
 import Razorpay from "razorpay";
-import shortid from "shortid";
 import { prisma } from "@/db/prisma";
+import { nanoid } from "nanoid";
 
 type details = {
   amount: string;
@@ -38,7 +38,7 @@ export default async function handler(
     });
 
     const amount = body.amount;
-    const receipt = shortid.generate();
+    const receipt = nanoid(10);
 
     const receiptUpload = await prisma.razorpayReceipts.create({
       data: {

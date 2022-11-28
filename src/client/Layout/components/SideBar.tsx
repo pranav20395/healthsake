@@ -36,6 +36,13 @@ const SideBar: FC = () => {
             <SideBarLink href="/wallet">Wallet</SideBarLink>
           </>
         )}
+        {sessionData.type === "ADMIN" && (
+          <>
+            <SideBarLink href="/available-meds">
+              Available Medicines
+            </SideBarLink>
+          </>
+        )}
         <button
           className="rounded-r-full p-3 px-8 pl-20 text-left text-sm transition-all ease-in-out hover:bg-indigo-600 hover:text-white hover:shadow-2xl"
           onClick={() => onSubmit()}

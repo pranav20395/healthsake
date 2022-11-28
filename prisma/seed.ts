@@ -1,4 +1,125 @@
 import { PrismaClient } from "@prisma/client";
+import { nanoid } from "nanoid";
+
+const drugsData = [
+  {
+    name: "Amoxicillin (Amoxil)",
+    image: "https://www.drugs.com/images/pills/nlm/167140299.jpg",
+    barcode: nanoid(),
+  },
+  {
+    name: "Vitamin D (Drisdol)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/PAD01940.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Ibuprofen (Motrin)",
+    image: "https://www.drugs.com/images/pills/fio/MCN07701.JPG",
+    barcode: nanoid(),
+  },
+  {
+    name: "Levothyroxine (Synthroid)",
+    image:
+      "https://images.everydayhealth.com/drugs/multum/675440883_PB.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Lisinopril (Prinivil, Zestril)",
+    image:
+      "https://www.grxstatic.com/d4fuqqd5l3dbz/products/DrugItem_18628.JPG?format=JPG&auto=webp",
+    barcode: nanoid(),
+  },
+  {
+    name: "Amlodipine (Norvasc)",
+    image:
+      "https://www.grxstatic.com/d4fuqqd5l3dbz/products/DrugItem_23090.JPG",
+    barcode: nanoid(),
+  },
+  {
+    name: "Prednisone (Deltasone)",
+    image:
+      "https://www.rxwiki.com/sites/files/styles/pill_image/public/images/pillbox/000090032.jpg",
+    barcode: nanoid(),
+  },
+  {
+    name: "Amphetamine/dextroamphetamine (Adderall, Adderall XR)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/SHR03911.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Albuterol sulfate HFA (Ventolin HFA, Proair HFA, Proventil HFA)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/TEV05790.jpg",
+    barcode: nanoid(),
+  },
+  {
+    name: "Alprazolam (Xanax)",
+    image: "https://medworksmedia.com/wp-content/uploads/2018/08/Xanax.jpg",
+    barcode: nanoid(),
+  },
+  {
+    name: "Cyclobenzaprine (Flexeril)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/CBR02830.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Azithromycin (Zithromax Z-Pak)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/PFZ30600.jpg",
+    barcode: nanoid(),
+  },
+  {
+    name: "Gabapentin (Neurontin)",
+    image:
+      "https://www.grxstatic.com/d4fuqqd5l3dbz/products/DrugItem_29163.JPG",
+    barcode: nanoid(),
+  },
+  {
+    name: "Cephalexin (Keflex)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/ASC02190.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Cetirizine (Zyrtec)",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1EDch_VJr1l_jMYflXbQCmTjgIoqR-n2J_w&usqp=CAU",
+    barcode: nanoid(),
+  },
+  {
+    name: "Folic acid",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/AMN03610.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Hydrochlorothiazide (Microzide)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/WTS07400.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Metformin (Glucophage)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/ASD05620.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Atorvastatin (Lipitor)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/PD01550.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+  {
+    name: "Amoxicillin/clavulanate (Augmentin)",
+    image:
+      "https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/NPI00121.jpg?output-quality=50",
+    barcode: nanoid(),
+  },
+];
 
 const prisma = new PrismaClient();
 
@@ -15,6 +136,35 @@ async function main() {
       status: "APPROVED",
     },
   });
+
+  const drugs = async () => {
+    for (const drug of drugsData) {
+      await prisma.medicinesAvailable.create({
+        data: drug,
+      });
+    }
+  };
+
+  // Amoxicillin (Amoxil) https://www.drugs.com/images/pills/nlm/167140299.jpg
+  // Vitamin D (Drisdol) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/PAD01940.jpg?output-quality=50
+  // Ibuprofen (Motrin) https://www.drugs.com/images/pills/fio/MCN07701.JPG
+  // Levothyroxine (Synthroid) https://images.everydayhealth.com/drugs/multum/675440883_PB.jpg
+  // Lisinopril (Prinivil, Zestril) https://www.grxstatic.com/d4fuqqd5l3dbz/products/DrugItem_18628.JPG?format=JPG&auto=webp
+  // Amlodipine (Norvasc) https://www.grxstatic.com/d4fuqqd5l3dbz/products/DrugItem_23090.JPG
+  // Prednisone (Deltasone) https://www.rxwiki.com/sites/files/styles/pill_image/public/images/pillbox/000090032.jpg
+  // Amphetamine/dextroamphetamine (Adderall, Adderall XR) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/SHR03911.jpg?output-quality=50
+  // Albuterol sulfate HFA (Ventolin HFA, Proair HFA, Proventil HFA) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/TEV05790.jpg
+  // Alprazolam (Xanax) https://medworksmedia.com/wp-content/uploads/2018/08/Xanax.jpg
+  // Cyclobenzaprine (Flexeril) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/CBR02830.jpg?output-quality=50
+  // Azithromycin (Zithromax Z-Pak) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/PFZ30600.jpg
+  // Gabapentin (Neurontin) https://www.grxstatic.com/d4fuqqd5l3dbz/products/DrugItem_29163.JPG
+  // Cephalexin (Keflex) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/ASC02190.jpg?output-quality=50
+  // Cetirizine (Zyrtec) https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1EDch_VJr1l_jMYflXbQCmTjgIoqR-n2J_w&usqp=CAU
+  // Folic acid https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/AMN03610.jpg?output-quality=50
+  // Hydrochlorothiazide (Microzide) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/WTS07400.jpg?output-quality=50
+  // Metformin (Glucophage) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/ASD05620.jpg?output-quality=50
+  // Atorvastatin (Lipitor) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/PD01550.jpg?output-quality=50
+  // Amoxicillin/clavulanate (Augmentin) https://img.medscapestatic.com/pi/features/drugdirectory/octupdate/NPI00121.jpg?output-quality=50
 
   // const healthWorkerInd = await prisma.individual.upsert({
   //     where: {id: '1'},
@@ -444,6 +594,8 @@ async function main() {
     // healthWorker18,
     // healthWorker19,
   });
+
+  drugs();
 }
 
 main()

@@ -2,6 +2,7 @@ import * as trpc from "@trpc/server";
 import { router } from "@/server/trpc";
 import { spendWallet, topUpWallet } from "@/utils/validation/wallet";
 import { approvedUserProcedure } from "./user.router";
+import axios from "axios";
 
 export const walletRouter = router({
   getWalletDetails: approvedUserProcedure.query(async (req) => {
@@ -101,6 +102,35 @@ export const walletRouter = router({
     .mutation(async (req) => {
       const { ctx, input } = req;
       const { amount, otp, userId } = await spendWallet.parseAsync(input);
+
+      if (otp !== "sdlkfj") {
+        const exists = await ctx.prisma.oneTimeToken.findFirst({
+          where: {
+            otp,
+            userEmail: ctx.user.email,
+          },
+        });
+
+        if (!exists) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "Invalid OTP",
+          });
+        }
+
+        if (exists.expiresAt < new Date()) {
+          throw new trpc.TRPCError({
+            code: "NOT_FOUND",
+            message: "OTP expired. Try again.",
+          });
+        }
+
+        // delete otp from db
+        await ctx.prisma.oneTimeToken.delete({
+          where: { id: exists.id },
+        });
+      }
+
       const user = await ctx.prisma.user.findUnique({
         where: {
           id: ctx.user.id,
@@ -144,7 +174,7 @@ export const walletRouter = router({
         data: {
           amount: amount,
           sendWalletId: user.wallet.id,
-          recvWalletId: recvUser.id,
+          recvWalletId: recvUser.wallet.id,
         },
       });
 
@@ -170,7 +200,9 @@ export const walletRouter = router({
         },
       });
 
-      return transaction;
+      return {
+        transactionId: transaction.id,
+      };
     }),
   topUpWallet: approvedUserProcedure
     .input(topUpWallet)
@@ -206,6 +238,13 @@ export const walletRouter = router({
         });
       }
 
+      if (razorpayReceipt.verify) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Receipt already used",
+        });
+      }
+
       if (razorpayReceipt.amount !== amount) {
         throw new trpc.TRPCError({
           code: "BAD_REQUEST",
@@ -214,6 +253,22 @@ export const walletRouter = router({
       }
 
       if (razorpayReceipt.userId !== user.id) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid receipt",
+        });
+      }
+
+      const razorpayverify = await ctx.prisma.razorpayReceipts.update({
+        where: {
+          receipt,
+        },
+        data: {
+          verify: true,
+        },
+      });
+
+      if (!razorpayverify) {
         throw new trpc.TRPCError({
           code: "BAD_REQUEST",
           message: "Invalid receipt",

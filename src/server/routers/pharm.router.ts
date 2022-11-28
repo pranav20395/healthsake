@@ -84,7 +84,7 @@ export const pharmRouter = router({
     .input(addMedicine)
     .mutation(async (req) => {
       const { ctx } = req;
-      const { image, name, price, quantity } = req.input;
+      const { availableMedsId, price, quantity } = req.input;
       const pharmacy = await ctx.prisma.pharmacy.findUnique({
         where: {
           userId: ctx.user.id,
@@ -98,10 +98,24 @@ export const pharmRouter = router({
         });
       }
 
+      const medDetails = await ctx.prisma.medicinesAvailable.findUnique({
+        where: {
+          id: availableMedsId,
+        },
+      });
+
+      if (!medDetails) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "Medicine not found/not approved",
+        });
+      }
+
       const medicine = await ctx.prisma.medicine.create({
         data: {
-          image,
-          name,
+          image: medDetails.image,
+          name: medDetails.name,
+          barcode: medDetails.barcode,
           price,
           quantity,
           pharmacyId: pharmacy.id,
@@ -122,7 +136,7 @@ export const pharmRouter = router({
     .input(updateMedicine)
     .mutation(async (req) => {
       const { ctx } = req;
-      const { id, image, name, price, quantity } = req.input;
+      const { id, price, quantity } = req.input;
       const pharmacy = await ctx.prisma.pharmacy.findUnique({
         where: {
           userId: ctx.user.id,
@@ -141,8 +155,6 @@ export const pharmRouter = router({
           id: id,
         },
         data: {
-          image,
-          name,
           price,
           quantity,
           pharmacyId: pharmacy.id,

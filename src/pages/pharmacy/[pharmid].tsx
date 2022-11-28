@@ -4,6 +4,7 @@ import { trpc } from "@/utils/trpc";
 import {
   AddMedicine,
   addMedicine,
+  Medicine,
   UpdateMedicine,
   updateMedicine,
 } from "@/utils/validation/pharm";
@@ -36,14 +37,14 @@ const PharmPage = () => {
   const router = useRouter();
   const ctxUser = useUserContext();
 
-  const [cart, setCart] = useState<AddMedicine[]>([]);
+  const [cart, setCart] = useState<Medicine[]>([]);
   const [loggingErrors, setLoggingErrors] = useState<string>("");
 
-  const addToCart = (medicine: AddMedicine) => {
+  const addToCart = (medicine: Medicine) => {
     setCart((prev) => [...prev, medicine]);
   };
 
-  const removeFromCart = (medicine: AddMedicine) => {
+  const removeFromCart = (medicine: Medicine) => {
     setCart((prev) => prev.filter((m) => m.name !== medicine.name));
   };
 
@@ -96,6 +97,8 @@ const PharmPage = () => {
   if (!pharmid) {
     return <p>Loading..</p>;
   }
+
+  const { data: availableMeds } = trpc.admin.getAvailableMeds.useQuery();
 
   const { data } = trpc.pharm.getAllMedicinesOfPharmacy.useQuery({
     pharmid: pharmid.toString(),
@@ -215,25 +218,21 @@ const PharmPage = () => {
             onSubmit={handleSubmit(onSubmit)}
           >
             <label className="flex flex-col gap-2 text-sm">
-              Image Link:
-              <input
+              Select Medicine:
+              <select
                 className="rounded-lg py-2 px-2 text-black"
-                type="text"
-                {...register("image")}
-              />
-              {errors.image && (
-                <p className="text-xs text-red-500">{errors.image?.message}</p>
-              )}
-            </label>
-            <label className="flex flex-col gap-2 text-sm">
-              Medicine Name:
-              <input
-                className="rounded-lg py-2 px-2 text-black"
-                type="text"
-                {...register("name")}
-              />
-              {errors.name && (
-                <p className="text-xs text-red-500">{errors.name?.message}</p>
+                {...register("availableMedsId")}
+              >
+                {availableMeds?.map((med) => (
+                  <option key={med.id} value={med.id}>
+                    {med.name}
+                  </option>
+                ))}
+              </select>
+              {errors.availableMedsId && (
+                <p className="text-xs text-red-500">
+                  {errors.availableMedsId?.message}
+                </p>
               )}
             </label>
             <label className="flex flex-col gap-2 text-sm">
@@ -279,30 +278,8 @@ const PharmPage = () => {
                 type="text"
                 {...reg("id")}
               />
-              {errs.image && (
-                <p className="text-xs text-red-500">{errs.image?.message}</p>
-              )}
-            </label>
-            <label className="flex flex-col gap-2 text-sm">
-              Image Link:
-              <input
-                className="rounded-lg py-2 px-2 text-black"
-                type="text"
-                {...reg("image")}
-              />
-              {errs.image && (
-                <p className="text-xs text-red-500">{errs.image?.message}</p>
-              )}
-            </label>
-            <label className="flex flex-col gap-2 text-sm">
-              Medicine Name:
-              <input
-                className="rounded-lg py-2 px-2 text-black"
-                type="text"
-                {...reg("name")}
-              />
-              {errs.name && (
-                <p className="text-xs text-red-500">{errs.name?.message}</p>
+              {errs.id && (
+                <p className="text-xs text-red-500">{errs.id?.message}</p>
               )}
             </label>
             <label className="flex flex-col gap-2 text-sm">

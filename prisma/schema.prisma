@@ -150,22 +150,21 @@ model Prescription {
   patient            User                 @relation("patient", fields: [patientId], references: [id])
   doctorId           String
   doctor             User                 @relation("doctor", fields: [doctorId], references: [id])
-  Bill               Bill[]
   ConsulationRequest ConsulationRequest[]
 }
 
 model Bill {
-  id             String          @id @default(cuid())
-  fileId         String
-  file           FileStorage     @relation(fields: [fileId], references: [id])
-  patientId      String
-  patient        User            @relation("patient", fields: [patientId], references: [id])
-  orgId          String
-  organisation   User            @relation("organisation", fields: [orgId], references: [id])
-  purpose        String          @default("CONSULTATION")
-  prescriptionId String?
-  prescription   Prescription?   @relation(fields: [prescriptionId], references: [id])
-  InsuranceLogs  InsuranceLogs[]
+  id            String          @id @default(cuid())
+  fileId        String
+  file          FileStorage     @relation(fields: [fileId], references: [id])
+  patientId     String
+  patient       User            @relation("patient", fields: [patientId], references: [id])
+  orgId         String
+  organisation  User            @relation("organisation", fields: [orgId], references: [id])
+  purpose       String          @default("CONSULTATION")
+  transactionId String?
+  transaction   Transaction?    @relation(fields: [transactionId], references: [id])
+  InsuranceLogs InsuranceLogs[]
 }
 
 // enum BillPurpose {
@@ -240,19 +239,23 @@ model Wallet {
 }
 
 model Transaction {
-  id            String          @id @default(cuid())
-  amount        Int
-  timestamp     DateTime        @default(now())
-  recvWalletId  String
-  recvWallet    Wallet          @relation("recvTransaction", fields: [recvWalletId], references: [id])
-  sendWalletId  String
-  sendWallet    Wallet          @relation("Transaction", fields: [sendWalletId], references: [id])
-  InsuranceLogs InsuranceLogs[]
+  id                 String               @id @default(cuid())
+  verify             Boolean              @default(false)
+  amount             Int
+  timestamp          DateTime             @default(now())
+  recvWalletId       String
+  recvWallet         Wallet               @relation("recvTransaction", fields: [recvWalletId], references: [id])
+  sendWalletId       String
+  sendWallet         Wallet               @relation("Transaction", fields: [sendWalletId], references: [id])
+  InsuranceLogs      InsuranceLogs[]
+  ConsulationRequest ConsulationRequest[]
+  Bill               Bill[]
 }
 
 model RazorpayReceipts {
   id        String   @id @default(cuid())
   receipt   String   @unique
+  verify    Boolean  @default(false)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   amount    Int
@@ -270,6 +273,7 @@ model Medicine {
   id         String   @id @default(cuid())
   image      String
   name       String
+  barcode    String?
   price      Int
   quantity   Int
   pharmacyId String
@@ -285,5 +289,14 @@ model ConsulationRequest {
   status         String        @default("PENDING")
   prescriptionId String?
   prescription   Prescription? @relation(fields: [prescriptionId], references: [id])
+  transactionId  String?
+  transaction    Transaction?  @relation(fields: [transactionId], references: [id])
   timestamp      DateTime      @default(now())
+}
+
+model MedicinesAvailable {
+  id      String @id @default(cuid())
+  image   String
+  name    String
+  barcode String
 }

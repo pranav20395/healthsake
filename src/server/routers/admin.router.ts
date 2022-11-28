@@ -1,6 +1,12 @@
 import { publicProcedure, router, t } from "../trpc";
 import * as trpc from "@trpc/server";
 import { approveUserSchema } from "@/utils/validation/verify";
+import {
+  addToAvailableMeds,
+  updateAvailableMeds,
+} from "@/utils/validation/pharm";
+import { nanoid } from "nanoid";
+import { approvedUserProcedure } from "./user.router";
 
 const isAdmin = t.middleware(async ({ ctx, next }) => {
   if (!ctx.user) {
@@ -33,6 +39,54 @@ const isAdmin = t.middleware(async ({ ctx, next }) => {
 const adminProcedure = publicProcedure.use(isAdmin);
 
 export const adminRouter = router({
+  getAvailableMeds: approvedUserProcedure.query(async (req) => {
+    const { ctx } = req;
+    const meds = await ctx.prisma.medicinesAvailable.findMany({
+      orderBy: {
+        name: "asc",
+      },
+    });
+    return meds;
+  }),
+
+  addToAvailableMeds: adminProcedure
+    .input(addToAvailableMeds)
+    .mutation(async (req) => {
+      const { ctx, input } = req;
+      const { name, image } = await addToAvailableMeds.parseAsync(input);
+
+      const barcode = nanoid(10);
+
+      const med = await ctx.prisma.medicinesAvailable.create({
+        data: {
+          name,
+          image,
+          barcode,
+        },
+      });
+
+      return med;
+    }),
+
+  updateAvailableMed: adminProcedure
+    .input(updateAvailableMeds)
+    .mutation(async (req) => {
+      const { ctx, input } = req;
+      const { name, image, id } = await updateAvailableMeds.parseAsync(input);
+
+      const med = await ctx.prisma.medicinesAvailable.update({
+        where: {
+          id,
+        },
+        data: {
+          name,
+          image,
+        },
+      });
+
+      return med;
+    }),
+
   getLogs: adminProcedure.query(async (req) => {
     return req.ctx.prisma.log.findMany({
       orderBy: {

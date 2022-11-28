@@ -187,7 +187,7 @@ const Home: NextPage = () => {
                 Admin Panel
               </h2>
               <div className="flex w-full justify-between gap-4">
-                <div className="flex h-[70vh] w-1/2 flex-col gap-4 overflow-auto 2xl:w-2/5">
+                <div className="flex h-[70vh] w-1/2 flex-col gap-4 overflow-auto pr-4 2xl:w-2/5">
                   <h3 className="text-xl font-medium text-gray-200">
                     Approval Requesting Users
                   </h3>
@@ -294,7 +294,7 @@ const Home: NextPage = () => {
           {/*Search Results*/}
           <div
             className={
-              "absolute right-0 mt-2 flex w-full flex-col items-center" +
+              "absolute right-0 mt-2 flex w-full flex-col items-center gap-4" +
               (query === "" ? "hidden" : "")
             }
           >
@@ -313,140 +313,31 @@ const Home: NextPage = () => {
                   <a
                     href={`/user/${user.id}`}
                     key={user.id}
-                    className="flex w-full flex-col gap-2 border-2 border-gray-200 bg-gray-500 p-6 text-indigo-600"
+                    className="flex w-full flex-col gap-2 rounded-lg border-4 border-indigo-800 bg-indigo-500/60 p-4 px-8 text-white"
                   >
-                    <div className="flex flex-row gap-2">
-                      <div className="font-medium text-black">Name:</div>
+                    <div className="flex flex-row gap-2 text-2xl font-medium">
                       <div>{user.name}</div>
-                    </div>
-                    <div className="flex flex-row gap-2">
-                      <div className="font-medium text-black">Email:</div>
-                      <div>{user.email}</div>
-                    </div>
-                    <div className="flex flex-row gap-2">
-                      <div className="font-medium text-black">Status:</div>
-                      <div>{user.status}</div>
-                    </div>
-                    <div className="flex flex-row gap-2">
-                      <div className="font-medium text-black">Type:</div>
-                      <div>{user.type}</div>
                     </div>
                     {user.type === "INDIVIDUAL" ? (
                       <>
                         <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">Role:</div>
-
-                          <div>{user.individual?.role}</div>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">Image:</div>
-
-                          <Link
-                            target={"_blank"}
-                            href={user.individual?.image || ""}
-                          >
-                            {user.individual?.image || ""}
-                          </Link>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">
-                            Identity Proof:
+                          <div className="rounded-full bg-cyan-500 px-2 text-sm font-bold lowercase text-white">
+                            {user.individual?.role}
                           </div>
-
-                          <Link
-                            target={"_blank"}
-                            href={user.individual?.identity || ""}
-                          >
-                            {user.individual?.identity || ""}
-                          </Link>
                         </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">
-                            Address Proof:
-                          </div>
-
-                          <Link
-                            target={"_blank"}
-                            href={user.individual?.address || ""}
-                          >
-                            {user.individual?.address || ""}
-                          </Link>
-                        </div>
-
-                        {user.individual?.role === "HEALTHCARE" && (
-                          <div className="flex flex-row gap-2">
-                            <div className="font-medium text-black">
-                              Health License:
-                            </div>
-
-                            <Link
-                              target={"_blank"}
-                              href={user.individual?.healthLicense || ""}
-                            >
-                              {user.individual?.healthLicense || ""}
-                            </Link>
-                          </div>
-                        )}
                       </>
                     ) : (
                       <></>
                     )}
-                    {user.type === "ORGANIZATION" ? (
+                    {user.type === "ORGANISATION" ? (
                       <>
                         <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">Role:</div>
-                          <div>{user.organisation?.role}</div>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">Image1:</div>
-                          <Link
-                            target={"_blank"}
-                            href={user.organisation?.image1 || ""}
-                          >
-                            {user.organisation?.image1 || ""}
-                          </Link>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">Image2:</div>
-                          <Link
-                            target={"_blank"}
-                            href={user.organisation?.image2 || ""}
-                          >
-                            {user.organisation?.image2 || ""}
-                          </Link>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">License:</div>
-                          <Link
-                            target={"_blank"}
-                            href={user.organisation?.license || ""}
-                          >
-                            {user.organisation?.license || ""}
-                          </Link>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">Permit:</div>
-                          <Link
-                            target={"_blank"}
-                            href={user.organisation?.permit || ""}
-                          >
-                            {user.organisation?.permit || ""}
-                          </Link>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">
-                            Location:
+                          <div className="rounded-full bg-purple-500 px-2 text-sm font-bold lowercase text-white">
+                            {user.organisation?.role}
                           </div>
-                          <Link
-                            target={"_blank"}
-                            href={user.organisation?.location || ""}
-                          >
-                            {user.organisation?.location || ""}
-                          </Link>
                         </div>
-                        <div className="flex flex-row gap-2">
-                          <div className="font-medium text-black">Phone:</div>
-                          <div>{user.organisation?.phone}</div>
+                        <div className="flex flex-row gap-2 text-sm">
+                          <div>{user.organisation?.description}</div>
                         </div>
                       </>
                     ) : (

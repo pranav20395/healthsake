@@ -54,9 +54,9 @@ const Register: NextPage = () => {
 
   const [isHealthCare, setIsHealthCare] = useState<boolean>(true);
 
-  const formSchema = isHealthCare
-    ? healthCareVerifySchema
-    : patientVerifySchema;
+  const formSchema = !isHealthCare
+    ? patientVerifySchema
+    : healthCareVerifySchema;
 
   type FormSchemaType = z.infer<typeof formSchema>;
 
