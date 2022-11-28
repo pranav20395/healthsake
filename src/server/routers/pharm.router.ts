@@ -3,9 +3,11 @@ import { router, t } from "@/server/trpc";
 import { approvedUserProcedure } from "./user.router";
 import {
   addMedicine,
+  checkoutverify,
   pharmdetails,
   updateMedicine,
 } from "@/utils/validation/pharm";
+import { patientProcedure } from "./patient.router";
 
 const isPharmacy = t.middleware(async ({ ctx, next }) => {
   if (!ctx.user) {

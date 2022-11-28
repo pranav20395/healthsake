@@ -42,6 +42,11 @@ export const medicine = z.object({
   quantity: z.number(),
 });
 
+export const checkoutverify = z.object({
+  medicines: z.array(medicine),
+  prescriptionId: z.string(),
+});
+
 export type Medicine = z.infer<typeof medicine>;
 export type PrescribeMedicine = z.infer<typeof prescribeMedicine>;
 export type AddAvailMedicine = z.infer<typeof addToAvailableMeds>;

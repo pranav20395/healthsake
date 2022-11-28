@@ -15,19 +15,6 @@ export const otpRouter = router({
     const { input, ctx } = req;
     const { email } = input;
 
-    // todo check if email exists only when logging in
-    // //Check if user is registered
-    // const userExists = await ctx.prisma.user.findFirst({
-    //     where: {email},
-    // });
-    //
-    // if (!userExists) {
-    //     throw new trpc.TRPCError({
-    //         code: "NOT_FOUND",
-    //         message: "User not found.",
-    //     });
-    // }
-
     // Check if user has otp already
     const exists = await ctx.prisma.oneTimeToken.findFirst({
       where: { user: { email } },

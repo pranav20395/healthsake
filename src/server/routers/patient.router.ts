@@ -1,10 +1,13 @@
 import {
   alreadyConsultated,
   cancelConsultation,
+  getPrescriptionLink,
   prescribeMedicine,
   requestConsultation,
 } from "@/utils/validation/consultation";
 import * as trpc from "@trpc/server";
+import axios from "axios";
+import { connect } from "http2";
 import { router, t } from "../trpc";
 import { approvedUserProcedure } from "./user.router";
 import { walletRouter } from "./wallet.router";
@@ -266,7 +269,7 @@ export const patientRouter = router({
 
       return consultation;
     }),
-  getAllConsultations: patientProcedure.query(async (req) => {
+  getAllConsultations: approvedUserProcedure.query(async (req) => {
     const { ctx } = req;
     const consultations = await ctx.prisma.consulationRequest.findMany({
       where: {
@@ -388,11 +391,69 @@ export const patientRouter = router({
 
     return consultationDetails;
   }),
+  getPrescriptionLink: approvedUserProcedure
+    .input(getPrescriptionLink)
+    .mutation(async (req) => {
+      const { ctx } = req;
+      const { prescriptionId } = req.input;
+
+      const prescription = await ctx.prisma.prescription.findUnique({
+        where: {
+          id: prescriptionId,
+        },
+      });
+
+      if (!prescription) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "Prescription not found",
+        });
+      }
+
+      const file = await ctx.prisma.fileStorage.findUnique({
+        where: {
+          id: prescription.fileId,
+        },
+      });
+
+      if (!file) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "File not found",
+        });
+      }
+
+      return file.url.replace(
+        "Users/jaideepguntupalli/Codespaces/fcsake/uploads/",
+        ""
+      );
+    }),
+
   rejectConsultation: doctorProcedure
     .input(cancelConsultation)
     .mutation(async (req) => {
       const { ctx } = req;
       const { consultationId } = req.input;
+
+      const consilt = await ctx.prisma.consulationRequest.findUnique({
+        where: {
+          id: consultationId,
+        },
+      });
+
+      if (!consilt) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "Consultation not found",
+        });
+      }
+
+      if (consilt.status === "DONE") {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Consultation already done",
+        });
+      }
 
       const consultation = await ctx.prisma.consulationRequest.update({
         where: {
@@ -443,6 +504,13 @@ export const patientRouter = router({
         });
       }
 
+      if (consultation.status === "DONE") {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Consultation not done yet",
+        });
+      }
+
       const doctor = await ctx.prisma.user.findUnique({
         where: {
           id: ctx.user.id,
@@ -469,13 +537,140 @@ export const patientRouter = router({
         });
       }
 
-      console.log({
-        ...consultation,
-        patient,
-        doctor,
-        med,
+      // get medicine names
+      const medicineIds = med.map((m) => m.availableMedsId);
+      const medicines = await ctx.prisma.medicinesAvailable.findMany({
+        where: {
+          id: {
+            in: medicineIds,
+          },
+        },
       });
 
-      return true;
+      const medswithNames = med.map((m) => {
+        const medicine = medicines.find((med) => med.id === m.availableMedsId);
+        return {
+          ...m,
+          name: medicine?.name,
+        };
+      });
+
+      // api request to /generate-pdf
+      const pdf = await axios.post(
+        "http://localhost:3000/api/file/generate-pdf",
+        {
+          patient,
+          doctor,
+          medswithNames,
+        }
+      );
+
+      if (!pdf) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "PDF generation failed",
+        });
+      }
+
+      const file = await ctx.prisma.fileStorage.create({
+        data: {
+          type: "application/pdf",
+          size: 0,
+          path: pdf.data.path,
+          url: `${process.env.BASE_URL}file/${pdf.data.path}`,
+          owner: {
+            connect: {
+              id: patient.id,
+            },
+          },
+          ReadAccessUsers: {
+            create: {
+              user: {
+                connect: {
+                  id: doctor.id,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!file) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "File not created",
+        });
+      }
+
+      const prescription = await ctx.prisma.prescription.create({
+        data: {
+          patient: {
+            connect: {
+              id: patient.id,
+            },
+          },
+          doctor: {
+            connect: {
+              id: doctor.id,
+            },
+          },
+          file: {
+            connect: {
+              id: file.id,
+            },
+          },
+        },
+      });
+
+      if (!prescription) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Prescription failed",
+        });
+      }
+
+      const consultationUpdated = await ctx.prisma.consulationRequest.update({
+        where: {
+          id: consultationId,
+        },
+        data: {
+          status: "DONE",
+          prescription: {
+            connect: {
+              id: prescription.id,
+            },
+          },
+        },
+      });
+
+      if (!consultationUpdated) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Consultation not updated",
+        });
+      }
+
+      return consultationUpdated;
     }),
+  getPrescriptions: patientProcedure.query(async (req) => {
+    const { ctx } = req;
+    const prescriptions = await ctx.prisma.prescription.findMany({
+      where: {
+        patientId: ctx.user.id,
+      },
+      include: {
+        doctor: true,
+        file: true,
+      },
+    });
+
+    if (!prescriptions) {
+      throw new trpc.TRPCError({
+        code: "BAD_REQUEST",
+        message: "Prescriptions not found",
+      });
+    }
+
+    return prescriptions;
+  }),
 });

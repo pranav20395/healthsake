@@ -44,6 +44,11 @@ const PrescribePage = () => {
 
   const pmeds = trpc.patient.prescribeMedicine.useMutation();
 
+  if (consultation?.status === "DONE") {
+    router.push("/prescriptions");
+    return <></>;
+  }
+
   return (
     <Layout title="Prescribe">
       <div className="mx-auto flex w-11/12 flex-col gap-10 pt-6">

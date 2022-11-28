@@ -102,6 +102,15 @@ export const verifyRouter = router({
                         id: admin?.id,
                       },
                     },
+                    ReadAccessUsers: {
+                      create: {
+                        user: {
+                          connect: {
+                            id: ctx.user.id,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -117,6 +126,15 @@ export const verifyRouter = router({
                     owner: {
                       connect: {
                         id: admin?.id,
+                      },
+                    },
+                    ReadAccessUsers: {
+                      create: {
+                        user: {
+                          connect: {
+                            id: ctx.user.id,
+                          },
+                        },
                       },
                     },
                   },
@@ -135,6 +153,15 @@ export const verifyRouter = router({
                     owner: {
                       connect: {
                         id: profileImage.ownerId,
+                      },
+                    },
+                    ReadAccessUsers: {
+                      create: {
+                        user: {
+                          connect: {
+                            id: admin?.id,
+                          },
+                        },
                       },
                     },
                   },
@@ -190,6 +217,15 @@ export const verifyRouter = router({
                         id: admin?.id,
                       },
                     },
+                    ReadAccessUsers: {
+                      create: {
+                        user: {
+                          connect: {
+                            id: ctx.user.id,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -205,6 +241,15 @@ export const verifyRouter = router({
                     owner: {
                       connect: {
                         id: admin?.id,
+                      },
+                    },
+                    ReadAccessUsers: {
+                      create: {
+                        user: {
+                          connect: {
+                            id: ctx.user.id,
+                          },
+                        },
                       },
                     },
                   },
@@ -225,6 +270,15 @@ export const verifyRouter = router({
                         id: profileImage.ownerId,
                       },
                     },
+                    ReadAccessUsers: {
+                      create: {
+                        user: {
+                          connect: {
+                            id: admin?.id,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -240,6 +294,15 @@ export const verifyRouter = router({
                     owner: {
                       connect: {
                         id: admin?.id,
+                      },
+                    },
+                    ReadAccessUsers: {
+                      create: {
+                        user: {
+                          connect: {
+                            id: ctx.user.id,
+                          },
+                        },
                       },
                     },
                   },

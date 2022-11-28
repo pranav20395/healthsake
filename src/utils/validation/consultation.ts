@@ -12,6 +12,9 @@ export const alreadyConsultated = z.object({
 export const cancelConsultation = z.object({
   consultationId: z.string(),
 });
+export const getPrescriptionLink = z.object({
+  prescriptionId: z.string(),
+});
 
 export const prescribeMedicine = z.object({
   consultationId: z.string(),

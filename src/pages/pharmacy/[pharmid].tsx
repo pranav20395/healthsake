@@ -39,6 +39,8 @@ const PharmPage = () => {
 
   const [cart, setCart] = useState<Medicine[]>([]);
   const [loggingErrors, setLoggingErrors] = useState<string>("");
+  const [otpField, setOtpField] = useState<boolean>(false);
+  const [otp, setOtp] = useState<string>("");
 
   const addToCart = (medicine: Medicine) => {
     setCart((prev) => [...prev, medicine]);
@@ -94,6 +96,27 @@ const PharmPage = () => {
 
   const { pharmid } = router.query;
 
+  if (!pharmid) return <></>;
+
+  // cart.reduce((a, b) => a + b.price, 0)
+  const transact = trpc.wallet.spendWallet.useMutation({
+    onSuccess: (data) => {
+      router.reload();
+    },
+    onError: (err) => {
+      setLoggingErrors(err.message);
+    },
+  });
+
+  const otpGenerate = trpc.otp.generate.useMutation({
+    onSuccess: (data) => {
+      setOtpField(true);
+    },
+    onError: (err) => {
+      setLoggingErrors(err.message);
+    },
+  });
+
   if (!pharmid) {
     return <p>Loading..</p>;
   }
@@ -103,6 +126,12 @@ const PharmPage = () => {
   const { data } = trpc.pharm.getAllMedicinesOfPharmacy.useQuery({
     pharmid: pharmid.toString(),
   });
+
+  const { data: presc } = trpc.patient.getPrescriptions.useQuery();
+
+  if (!data) {
+    return <p>Loading..</p>;
+  }
 
   if (!ctxUser.verified) {
     if (ctxUser.type === "INDIVIDUAL") {
@@ -164,13 +193,58 @@ const PharmPage = () => {
                     <label htmlFor="prescription" className="flex gap-8">
                       Prescription
                       <select className="rounded-xl bg-indigo-600/80 text-gray-200">
-                        <option value="cash">Cash</option>
-                        <option value="card">Card</option>
+                        {presc?.map((presc: any, i) => (
+                          <option key={i} value={presc.id}>
+                            {`${
+                              presc.doctor.name
+                            } (${presc.file.createdAt.toLocaleDateString()})`}
+                          </option>
+                        ))}
                       </select>
                     </label>
-                    <button className="rounded-xl bg-indigo-300 p-3 px-8 text-sm text-indigo-800 transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900">
-                      Checkout
-                    </button>
+
+                    {otpField && (
+                      <label
+                        htmlFor="prescription"
+                        className="flex items-center gap-8"
+                      >
+                        Enter OTP:
+                        <input
+                          type="text"
+                          className="rounded-lg py-2 px-2 text-black"
+                          onChange={(e) => setOtp(e.target.value)}
+                        />
+                      </label>
+                    )}
+
+                    {!otpField ? (
+                      <button
+                        className="rounded-xl bg-indigo-300 p-3 px-8 text-sm text-indigo-800 transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
+                        onClick={(e) => {
+                          otpGenerate.mutate({ email: ctxUser.email });
+                        }}
+                      >
+                        Checkout
+                      </button>
+                    ) : (
+                      <button
+                        className="rounded-xl bg-indigo-300 p-3 px-8 text-sm text-indigo-800 transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
+                        onClick={(e) =>
+                          transact.mutate({
+                            amount: cart.reduce((a, b) => a + b.price, 0),
+                            otp,
+                            userId: data?.pharmacy.user.id.toString(),
+                          })
+                        }
+                      >
+                        Pay
+                      </button>
+                    )}
+                    {loggingErrors && (
+                      <p className="rounded-lg border-2 border-red-500 bg-red-200 p-2 text-sm text-red-600">
+                        Something went wrong! {loggingErrors}
+                      </p>
+                    )}
                   </div>
                 </>
               )}

@@ -26,6 +26,34 @@ const fileServe = async (
       req.userId = user.id;
       const { filename } = req.query;
       const filePath = path.resolve(".", `uploads/${filename}`);
+      const fileObj = await prisma.fileStorage.findFirst({
+        where: {
+          path: filePath,
+        },
+      });
+
+      if (!fileObj) {
+        res.status(404).send("File not found");
+        return;
+      }
+
+      if (fileObj.ownerId !== user.id) {
+        const readAccessUsers = await prisma.readAccessUsers.findMany({
+          where: {
+            fileId: fileObj.id,
+          },
+        });
+
+        const userHasAccess = readAccessUsers.find(
+          (readAccessUser) => readAccessUser.userId === user.id
+        );
+
+        if (userHasAccess === undefined) {
+          res.status(403).send("You don't have access to this file");
+          return;
+        }
+      }
+
       const fileBuffer = fs.readFileSync(filePath);
       const mimeString =
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
