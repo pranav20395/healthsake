@@ -2,7 +2,7 @@ import { useUserContext } from "@/context/user.context";
 import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 
-const PrescribePages = () => {
+const BillPages = () => {
   const router = useRouter();
   const ctxUser = useUserContext();
 
@@ -11,23 +11,23 @@ const PrescribePages = () => {
     return <></>;
   }
 
-  const { prescriptionId } = router.query;
+  const { billId } = router.query;
 
-  if (!prescriptionId) {
+  if (!billId) {
     return <p>Loading..</p>;
   }
 
-  const { data: prescriptionLink } = trpc.patient.getPrescriptionLink.useQuery({
-    prescriptionId: prescriptionId as string,
+  const { data: billLink } = trpc.patient.getBillLink.useQuery({
+    billId: billId as string,
   });
 
-  if (!prescriptionLink) {
+  if (!billLink) {
     return <p>Loading..</p>;
   }
 
-  router.push(prescriptionLink);
+  router.push(billLink);
 
   return <div>Loading...</div>;
 };
 
-export default PrescribePages;
+export default BillPages;

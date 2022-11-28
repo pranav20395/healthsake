@@ -5,6 +5,11 @@ export const requestConsultation = z.object({
   transactionId: z.string(),
 });
 
+export const requestBill = z.object({
+  orgId: z.string(),
+  transactionId: z.string(),
+});
+
 export const alreadyConsultated = z.object({
   doctorId: z.string(),
 });
@@ -16,8 +21,16 @@ export const alreadyRequested = z.object({
 export const cancelConsultation = z.object({
   consultationId: z.string(),
 });
+
+export const cancelbill = z.object({
+  billId: z.string(),
+});
 export const getPrescriptionLink = z.object({
   prescriptionId: z.string(),
+});
+
+export const getBillLink = z.object({
+  billId: z.string(),
 });
 
 export const prescribeMedicine = z.object({
@@ -30,4 +43,9 @@ export const prescribeMedicine = z.object({
       quantity: z.number(),
     })
   ),
+});
+
+export const issueBill = z.object({
+  billRequestId: z.string(),
+  transactionId: z.string(),
 });

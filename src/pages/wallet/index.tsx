@@ -147,17 +147,33 @@ const Wallet: NextPage = () => {
                 </p>
               </div>
             ) : (
-              <div
-                key={transaction.id}
-                className="flex w-full items-center justify-between rounded-xl bg-indigo-800 p-4 px-8"
-              >
-                <p>Amount: ₹ {transaction.amount}</p>
-                <p> recv: {transaction.recvName}</p>
-                <p> sent: {transaction.sendName}</p>
-                <p className="rounded-full bg-indigo-600 p-2 px-4 text-xs font-medium">
-                  {transaction.timestamp.toLocaleString()}
-                </p>
-              </div>
+              <>
+                {transaction.recvName === ctxUser.name ? (
+                  <div
+                    key={transaction.id}
+                    className="flex w-full items-center justify-between rounded-xl border-2 border-green-600 bg-indigo-800 p-4 px-8"
+                  >
+                    <p>Amount: ₹ {transaction.amount}</p>
+                    <p> recv: {transaction.recvName}</p>
+                    <p> sent: {transaction.sendName}</p>
+                    <p className="rounded-full bg-indigo-600 p-2 px-4 text-xs font-medium">
+                      {transaction.timestamp.toLocaleString()}
+                    </p>
+                  </div>
+                ) : (
+                  <div
+                    key={transaction.id}
+                    className="flex w-full items-center justify-between rounded-xl border-2 border-red-600 bg-indigo-800 p-4 px-8"
+                  >
+                    <p>Amount: ₹ {transaction.amount}</p>
+                    <p> recv: {transaction.recvName}</p>
+                    <p> sent: {transaction.sendName}</p>
+                    <p className="rounded-full bg-indigo-600 p-2 px-4 text-xs font-medium">
+                      {transaction.timestamp.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </>
             )
           )}
         </div>

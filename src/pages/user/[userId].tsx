@@ -28,7 +28,19 @@ const UserPage = () => {
     return <p>Loading..</p>;
   }
 
-  const consultRequest = trpc.patient.requestConsultation.useMutation();
+  const consultRequest = trpc.patient.requestConsultation.useMutation({
+    onSuccess: () => {
+      router.reload();
+    },
+    onError: (err) => setErrors(err.message),
+  });
+
+  const requestBills = trpc.patient.requestBill.useMutation({
+    onSuccess: () => {
+      router.reload();
+    },
+    onError: (err) => setErrors(err.message),
+  });
 
   const transact = trpc.wallet.spendWallet.useMutation({
     onSuccess: (data) => {
@@ -36,7 +48,18 @@ const UserPage = () => {
         doctorId: userId.toString(),
         transactionId: data.transactionId,
       });
-      router.reload();
+    },
+    onError: (err) => {
+      setErrors(err.message);
+    },
+  });
+
+  const transactForBills = trpc.wallet.spendWallet.useMutation({
+    onSuccess: (data) => {
+      requestBills.mutate({
+        orgId: userId.toString(),
+        transactionId: data.transactionId,
+      });
     },
     onError: (err) => {
       setErrors(err.message);
@@ -321,7 +344,7 @@ const UserPage = () => {
                     <button
                       className="rounded-xl bg-indigo-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
                       onClick={(e) =>
-                        transact.mutate({
+                        transactForBills.mutate({
                           amount: 200,
                           otp,
                           userId: userId.toString(),

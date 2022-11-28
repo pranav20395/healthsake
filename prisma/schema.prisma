@@ -48,6 +48,8 @@ model User {
   Pharmacy                  Pharmacy[]
   patientConsulationRequest ConsulationRequest[] @relation("patient")
   ConsulationRequest        ConsulationRequest[] @relation("doctor")
+  patientBillRequest        BillRequest[]        @relation("patient")
+  BillRequest               BillRequest[]        @relation("org")
 }
 
 // enum UserStatus {
@@ -165,6 +167,7 @@ model Bill {
   transactionId String?
   transaction   Transaction?    @relation(fields: [transactionId], references: [id])
   InsuranceLogs InsuranceLogs[]
+  BillRequest   BillRequest[]
 }
 
 // enum BillPurpose {
@@ -203,6 +206,7 @@ model FileStorage {
   hash            String?
   ownerId         String
   owner           User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  isPublic        Boolean           @default(false)
   createdAt       DateTime          @default(now())
   ReadAccessUsers ReadAccessUsers[]
   Image           Image[]
@@ -251,6 +255,7 @@ model Transaction {
   InsuranceLogs      InsuranceLogs[]
   ConsulationRequest ConsulationRequest[]
   Bill               Bill[]
+  BillRequest        BillRequest[]
 }
 
 model RazorpayReceipts {
@@ -293,6 +298,20 @@ model ConsulationRequest {
   transactionId  String?
   transaction    Transaction?  @relation(fields: [transactionId], references: [id])
   timestamp      DateTime      @default(now())
+}
+
+model BillRequest {
+  id            String       @id @default(cuid())
+  patientId     String
+  patient       User         @relation("patient", fields: [patientId], references: [id])
+  orgId         String
+  org           User         @relation("org", fields: [orgId], references: [id])
+  status        String       @default("PENDING")
+  billId        String?
+  bill          Bill?        @relation(fields: [billId], references: [id])
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  timestamp     DateTime     @default(now())
 }
 
 model MedicinesAvailable {

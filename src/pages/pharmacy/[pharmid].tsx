@@ -98,10 +98,29 @@ const PharmPage = () => {
 
   if (!pharmid) return <></>;
 
-  // cart.reduce((a, b) => a + b.price, 0)
+  const requestBills = trpc.patient.requestBill.useMutation({
+    onSuccess: () => {
+      router.reload();
+    },
+    onError: (err) => setLoggingErrors(err.message),
+  });
+
+  const { data } = trpc.pharm.getAllMedicinesOfPharmacy.useQuery({
+    pharmid: pharmid.toString(),
+  });
+
+  const pharmDetails = data;
+
+  if (!pharmDetails) return <></>;
+
+  const { data: presc } = trpc.patient.getPrescriptions.useQuery();
+
   const transact = trpc.wallet.spendWallet.useMutation({
     onSuccess: (data) => {
-      router.reload();
+      requestBills.mutate({
+        orgId: pharmDetails?.pharmacy.user.id.toString(),
+        transactionId: data.transactionId,
+      });
     },
     onError: (err) => {
       setLoggingErrors(err.message);
@@ -122,12 +141,6 @@ const PharmPage = () => {
   }
 
   const { data: availableMeds } = trpc.admin.getAvailableMeds.useQuery();
-
-  const { data } = trpc.pharm.getAllMedicinesOfPharmacy.useQuery({
-    pharmid: pharmid.toString(),
-  });
-
-  const { data: presc } = trpc.patient.getPrescriptions.useQuery();
 
   if (!data) {
     return <p>Loading..</p>;
