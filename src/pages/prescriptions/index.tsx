@@ -97,7 +97,7 @@ const Prescriptions: NextPage = () => {
                       </div>
                       <div className="flex gap-2">
                         <Link
-                          href={`/prescriptions/create/${prescriptionReq.prescriptionId}`}
+                          href={`/prescriptions/create/${prescriptionReq.id}`}
                         >
                           <span className="flex cursor-pointer items-center rounded-xl bg-green-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl">
                             Prescribe
@@ -161,26 +161,14 @@ const Prescriptions: NextPage = () => {
                         {/* <p>{JSON.stringify(prescriptionReq)}</p> */}
                       </div>
                       <div className="flex gap-2">
-                        <Link href={`/file`}>
+                        <Link
+                          href={`/prescriptions/${prescriptionReq.prescriptionId}`}
+                        >
                           <span className="flex cursor-pointer items-center rounded-xl bg-green-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl">
                             View
                           </span>
                         </Link>
                       </div>
-                      {/* <div className="flex flex-col gap-2">
-                    <h1 className="text-xl font-medium">
-                      {prescriptionReq.patient.name}
-                    </h1>
-                    <p className="text-gray-500">
-                      {prescriptionReq.patient.age} years old
-                    </p>
-                  </div> */}
-                      {/* <div className="flex flex-col gap-2">
-                    <h1 className="text-xl font-medium">Medicines</h1>
-                    <div className="flex flex-col gap-2">
-                      {prescriptionReq.medicines.map((medicine) => (
-                        <div
-                           */}
                     </div>
                   ))}
                 </div>

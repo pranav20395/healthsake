@@ -96,7 +96,9 @@ const PharmPage = () => {
 
   const { pharmid } = router.query;
 
-  if (!pharmid) return <></>;
+  if (!pharmid) {
+    return <p>loading</p>;
+  }
 
   const requestBills = trpc.patient.requestBill.useMutation({
     onSuccess: () => {
@@ -111,16 +113,16 @@ const PharmPage = () => {
 
   const pharmDetails = data;
 
-  if (!pharmDetails) return <></>;
-
   const { data: presc } = trpc.patient.getPrescriptions.useQuery();
 
   const transact = trpc.wallet.spendWallet.useMutation({
     onSuccess: (data) => {
-      requestBills.mutate({
-        orgId: pharmDetails?.pharmacy.user.id.toString(),
-        transactionId: data.transactionId,
-      });
+      if (pharmDetails) {
+        requestBills.mutate({
+          orgId: pharmDetails?.pharmacy.user.id.toString(),
+          transactionId: data.transactionId,
+        });
+      }
     },
     onError: (err) => {
       setLoggingErrors(err.message);

@@ -534,6 +534,7 @@ export const patientRouter = router({
     .query(async (req) => {
       const { ctx } = req;
       const { consultationId } = req.input;
+
       const consultation = await ctx.prisma.consulationRequest.findUnique({
         where: {
           id: consultationId,

@@ -37,7 +37,7 @@ const PrescribePage = () => {
   }
 
   const { data: consultation } = trpc.patient.getConsultationDetails.useQuery({
-    consultationId: consultationId as string,
+    consultationId: consultationId.toString(),
   });
 
   const { data: availableMeds } = trpc.admin.getAvailableMeds.useQuery();
