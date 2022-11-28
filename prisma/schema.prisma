@@ -187,6 +187,7 @@ model InsuranceLogs {
   bill          Bill        @relation(fields: [billId], references: [id])
   transactionId String
   transaction   Transaction @relation(fields: [transactionId], references: [id])
+  timestamp     DateTime    @default(now())
 }
 
 model OneTimeToken {

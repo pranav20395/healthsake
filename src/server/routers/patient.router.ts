@@ -12,7 +12,6 @@ import {
 } from "@/utils/validation/consultation";
 import * as trpc from "@trpc/server";
 import axios from "axios";
-import { connect } from "http2";
 import { router, t } from "../trpc";
 import { approvedUserProcedure } from "./user.router";
 import { walletRouter } from "./wallet.router";
@@ -651,6 +650,142 @@ export const patientRouter = router({
     });
 
     return billDetails;
+  }),
+  getPatientInsuranceLogs: approvedUserProcedure.query(async (req) => {
+    const { ctx } = req;
+    const insuranceLogs = await ctx.prisma.insuranceLogs.findMany({
+      where: {
+        patientId: ctx.user.id,
+      },
+    });
+
+    // org details
+    const orgIds = insuranceLogs.map((c) => c.insureId);
+    const orgs = await ctx.prisma.user.findMany({
+      where: {
+        id: {
+          in: orgIds,
+        },
+      },
+    });
+
+    const orgDetails = orgs.map((d) => {
+      return {
+        id: d.id,
+        name: d.name,
+        email: d.email,
+      };
+    });
+
+    //get bill details
+    const billIds = insuranceLogs.map((c) => c.billId);
+    const bills = await ctx.prisma.bill.findMany({
+      where: {
+        id: {
+          in: billIds,
+        },
+      },
+    });
+
+    // get org details from bills
+    const billOrgIds = bills.map((c) => c.orgId);
+    const billOrgs = await ctx.prisma.user.findMany({
+      where: {
+        id: {
+          in: billOrgIds,
+        },
+      },
+    });
+
+    const billOrgDetails = billOrgs.map((d) => {
+      return {
+        id: d.id,
+        name: d.name,
+        email: d.email,
+      };
+    });
+
+    const insuranceLogDetails = insuranceLogs.map((c) => {
+      const org = orgDetails.find((d) => d.id === c.insureId);
+      const bill = bills.find((b) => b.id === c.billId);
+      const billOrg = billOrgDetails.find((d) => d.id === bill?.orgId);
+      return {
+        ...c,
+        org,
+        bill,
+        billOrg,
+      };
+    });
+
+    return insuranceLogDetails;
+  }),
+  getInsuranceLogs: orgProcedure.query(async (req) => {
+    const { ctx } = req;
+    const insuranceLogs = await ctx.prisma.insuranceLogs.findMany({
+      where: {
+        insureId: ctx.user.id,
+      },
+    });
+
+    // org details
+    const patientIds = insuranceLogs.map((c) => c.patientId);
+    const patients = await ctx.prisma.user.findMany({
+      where: {
+        id: {
+          in: patientIds,
+        },
+      },
+    });
+
+    const patientDetails = patients.map((d) => {
+      return {
+        id: d.id,
+        name: d.name,
+        email: d.email,
+      };
+    });
+
+    //get bill details
+    const billIds = insuranceLogs.map((c) => c.billId);
+    const bills = await ctx.prisma.bill.findMany({
+      where: {
+        id: {
+          in: billIds,
+        },
+      },
+    });
+
+    // get org details from bills
+    const billOrgIds = bills.map((c) => c.orgId);
+    const billOrgs = await ctx.prisma.user.findMany({
+      where: {
+        id: {
+          in: billOrgIds,
+        },
+      },
+    });
+
+    const billOrgDetails = billOrgs.map((d) => {
+      return {
+        id: d.id,
+        name: d.name,
+        email: d.email,
+      };
+    });
+
+    const insuranceLogDetails = insuranceLogs.map((c) => {
+      const patient = patientDetails.find((d) => d.id === c.patientId);
+      const bill = bills.find((b) => b.id === c.billId);
+      const billOrg = billOrgDetails.find((d) => d.id === bill?.orgId);
+      return {
+        ...c,
+        patient,
+        bill,
+        billOrg,
+      };
+    });
+
+    return insuranceLogDetails;
   }),
   getbillDetails: orgProcedure.input(cancelbill).query(async (req) => {
     const { ctx } = req;

@@ -420,6 +420,7 @@ const UserPage = () => {
                         className="rounded-xl bg-indigo-600/80 text-gray-200"
                         onChange={(e) => setBillId(e.target.value)}
                       >
+                        <option value={""}>Please select a bill</option>
                         {unclaimedBills?.map((bill: any, i) => (
                           <option key={i} value={bill.id}>
                             {`${

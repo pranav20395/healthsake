@@ -2,7 +2,6 @@ import Layout from "@/client/Layout";
 import { useUserContext } from "@/context/user.context";
 import { trpc } from "@/utils/trpc";
 import { NextPage } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
 
 const Pharmacy: NextPage = () => {

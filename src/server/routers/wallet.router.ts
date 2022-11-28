@@ -332,7 +332,7 @@ export const walletRouter = router({
         },
       });
 
-      await ctx.prisma.bill.update({
+      const billUpdate = await ctx.prisma.bill.update({
         where: {
           id: bill.id,
         },
@@ -340,6 +340,45 @@ export const walletRouter = router({
           claimed: true,
         },
       });
+
+      if (!billUpdate) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Bill not updated",
+        });
+      }
+
+      const insure = await ctx.prisma.insuranceLogs.create({
+        data: {
+          patient: {
+            connect: {
+              id: ctx.user.id,
+            },
+          },
+          insurance: {
+            connect: {
+              id: userId,
+            },
+          },
+          bill: {
+            connect: {
+              id: bill.id,
+            },
+          },
+          transaction: {
+            connect: {
+              id: transaction.id,
+            },
+          },
+        },
+      });
+
+      if (!insure) {
+        throw new trpc.TRPCError({
+          code: "BAD_REQUEST",
+          message: "Insurance not created",
+        });
+      }
 
       return {
         transactionId: transaction.id,
