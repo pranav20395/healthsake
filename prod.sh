@@ -9,3 +9,5 @@ rm /uploads/*
 yarn build
 
 pm2 restart fcsakev5 --update-env
+
+mkdir uploads
