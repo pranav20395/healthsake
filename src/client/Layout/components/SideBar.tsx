@@ -32,7 +32,6 @@ const SideBar: FC = () => {
             <SideBarLink href="/profile">Profile</SideBarLink>
             <SideBarLink href="/prescriptions">Prescriptions</SideBarLink>
             <SideBarLink href="/pharmacy">Pharmacy</SideBarLink>
-            <SideBarLink href="/bills">Bills</SideBarLink>
             <SideBarLink href="/wallet">Wallet</SideBarLink>
           </>
         )}
