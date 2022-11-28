@@ -58,6 +58,10 @@ const UserPage = () => {
     doctorId: userId.toString(),
   });
 
+  const { data: isRequested } = trpc.patient.alreadyRequested.useQuery({
+    hospId: userId.toString(),
+  });
+
   const { data: isPatient } = trpc.patient.isPatient.useQuery();
 
   if (data) {
@@ -232,6 +236,26 @@ const UserPage = () => {
                   <div className="font-medium text-white">Phone:</div>
                   <div>{user.organisation?.phone}</div>
                 </div>
+                {user.organisation?.role === "HOSPITAL" && (
+                  <>
+                    {isPatient && (
+                      <>
+                        <button
+                          className="rounded-xl bg-indigo-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
+                          onClick={(e) =>
+                            otpMutation.mutate({ email: ctxUser.email })
+                          }
+                          disabled={isRequested?.status}
+                        >
+                          Request for Tests
+                        </button>
+                        {otpErrors && (
+                          <p className="text-xs text-red-500">{otpErrors}</p>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
               </>
             ) : (
               <></>
@@ -239,40 +263,82 @@ const UserPage = () => {
           </div>
           {payment && (
             <>
-              <div className=" my-10 flex w-1/3 flex-col gap-4 rounded-xl bg-indigo-600/50 p-10 px-10 text-gray-200">
-                <h3 className="text-2xl font-medium">Payment Summary</h3>
-                <div className="flex flex-row gap-2">
-                  <div className="font-medium text-indigo-500">Amount:</div>
-                  <div>200</div>
-                </div>
-                <label className="flex flex-col gap-2 text-sm">
-                  Please enter the OTP sent to your mail:
-                  <input
-                    className="rounded-lg py-2 px-2 text-black"
-                    type="text"
-                    onChange={(e) => setotp(e.target.value)}
-                  />
-                </label>
-                {errors && <p className="text-xs text-red-500">{errors}</p>}
-                <button
-                  className="rounded-xl bg-indigo-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
-                  onClick={(e) =>
-                    transact.mutate({
-                      amount: 200,
-                      otp,
-                      userId: userId.toString(),
-                    })
-                  }
-                >
-                  Pay
-                </button>
-                <button
-                  className="rounded-xl bg-indigo-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
-                  onClick={(e) => setPayment(false)}
-                >
-                  Cancel
-                </button>
-              </div>
+              {user.individual?.role === "HEALTHCARE" && (
+                <>
+                  <div className=" my-10 flex w-1/3 flex-col gap-4 rounded-xl bg-indigo-600/50 p-10 px-10 text-gray-200">
+                    <h3 className="text-2xl font-medium">Payment Summary</h3>
+                    <div className="flex flex-row gap-2">
+                      <div className="font-medium text-indigo-500">Amount:</div>
+                      <div>200</div>
+                    </div>
+                    <label className="flex flex-col gap-2 text-sm">
+                      Please enter the OTP sent to your mail:
+                      <input
+                        className="rounded-lg py-2 px-2 text-black"
+                        type="text"
+                        onChange={(e) => setotp(e.target.value)}
+                      />
+                    </label>
+                    {errors && <p className="text-xs text-red-500">{errors}</p>}
+                    <button
+                      className="rounded-xl bg-indigo-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
+                      onClick={(e) =>
+                        transact.mutate({
+                          amount: 200,
+                          otp,
+                          userId: userId.toString(),
+                        })
+                      }
+                    >
+                      Pay
+                    </button>
+                    <button
+                      className="rounded-xl bg-indigo-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
+                      onClick={(e) => setPayment(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              )}
+              {user.organisation?.role === "HOSPITAL" && (
+                <>
+                  <div className=" my-10 flex w-1/3 flex-col gap-4 rounded-xl bg-indigo-600/50 p-10 px-10 text-gray-200">
+                    <h3 className="text-2xl font-medium">Payment Summary</h3>
+                    <div className="flex flex-row gap-2">
+                      <div className="font-medium text-indigo-500">Amount:</div>
+                      <div>200</div>
+                    </div>
+                    <label className="flex flex-col gap-2 text-sm">
+                      Please enter the OTP sent to your mail:
+                      <input
+                        className="rounded-lg py-2 px-2 text-black"
+                        type="text"
+                        onChange={(e) => setotp(e.target.value)}
+                      />
+                    </label>
+                    {errors && <p className="text-xs text-red-500">{errors}</p>}
+                    <button
+                      className="rounded-xl bg-indigo-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
+                      onClick={(e) =>
+                        transact.mutate({
+                          amount: 200,
+                          otp,
+                          userId: userId.toString(),
+                        })
+                      }
+                    >
+                      Pay
+                    </button>
+                    <button
+                      className="rounded-xl bg-indigo-600 p-3 px-8 text-sm text-white transition-all ease-in-out hover:shadow-2xl disabled:bg-indigo-900"
+                      onClick={(e) => setPayment(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

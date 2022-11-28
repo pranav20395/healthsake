@@ -1,5 +1,6 @@
 import {
   alreadyConsultated,
+  alreadyRequested,
   cancelConsultation,
   getPrescriptionLink,
   prescribeMedicine,
@@ -127,6 +128,43 @@ export const patientRouter = router({
         where: {
           patientId: ctx.user.id,
           doctorId,
+          status: "PENDING",
+        },
+      });
+
+      if (!consulationRequest) {
+        return {
+          status: false,
+        };
+      }
+
+      return {
+        status: true,
+      };
+    }),
+  alreadyRequested: patientProcedure
+    .input(alreadyRequested)
+    .query(async (req) => {
+      const { input, ctx } = req;
+      const { hospId } = await alreadyRequested.parseAsync(input);
+
+      const hospital = await ctx.prisma.user.findUnique({
+        where: {
+          id: hospId,
+        },
+      });
+
+      if (!hospital) {
+        throw new trpc.TRPCError({
+          code: "NOT_FOUND",
+          message: "Doctor not found",
+        });
+      }
+
+      const consulationRequest = await ctx.prisma.consulationRequest.findFirst({
+        where: {
+          patientId: ctx.user.id,
+          doctorId: hospId,
           status: "PENDING",
         },
       });
