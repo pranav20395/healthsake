@@ -17,8 +17,20 @@ export const otpRouter = router({
 
     // Check if user has otp already
     const exists = await ctx.prisma.oneTimeToken.findFirst({
-      where: { user: { email } },
+      where: {
+        OR: [
+          {
+            user: {email: email}
+          },
+          {
+            userEmail: email
+          }
+        ]
+      }
     });
+
+    console.log(exists);
+    
 
     if (!exists) {
       // Generate OTP
@@ -73,17 +85,17 @@ export const otpRouter = router({
         where: { email },
       });
 
-      if (!user) {
-        throw new trpc.TRPCError({
-          code: "NOT_FOUND",
-          message: "User not found.",
+      // Save OTP
+      if (user) {
+        await ctx.prisma.oneTimeToken.create({
+          data: { otp, userId: user.id, userEmail: email },
         });
       }
-
-      // Save OTP
-      await ctx.prisma.oneTimeToken.create({
-        data: { otp, userId: user.id, userEmail: email },
-      });
+      else {
+        await ctx.prisma.oneTimeToken.create({
+          data: { otp, userEmail: email },
+        });
+      }
 
       // Send OTP to email
       await sendEmail({ email, otp });
