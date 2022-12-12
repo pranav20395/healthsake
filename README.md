@@ -53,7 +53,7 @@ Some other features
 
 ## Built with
 
-[T3 Stack](https://create.t3.gg/)
+> Note: It only works on Node 16.x
 
 - [Next.js](https://nextjs.org)
 - [Tailwind CSS](https://tailwindcss.com)
