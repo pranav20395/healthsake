@@ -10,8 +10,11 @@ claims.
     - [Table of contents](#table-of-contents)
     - [Overview](#overview)
         - [What is the project?](#what-is-the-project)
-        - [What is the MVP (Minimal Viable Product)?](#what-is-the-mvp-minimal-viable-product)
+        - [What is the MVP (Minimal Viable Product)?](#what-is-the-mvp)
+    - [Built with](#built-with)
+    - [Relavent Links](#relavent-links)
     - [Understanding File Structure](#understanding-file-structure)
+    - [License](#license)
 
 ## Overview
 
@@ -21,7 +24,7 @@ A patient data management system is a software system developed primarily to fac
 patients’ documents while buying medicines or making medical claims. The focus of this project is to develop a portal
 that facilitates the secure exchange and verification of electronic health records.
 
-### What is the MVP (Minimal Viable Product)?
+### What is the MVP?
 
 Document Verification System: The patients will provide the documents to the healthcare professionals or organizations,
 which need to verify automatically.
@@ -48,6 +51,23 @@ Some other features
 - Admin capabilities as mentioned above or more.
 - User-Admin approval process using a document upload.
 
+## Built with
+
+[T3 Stack](https://create.t3.gg/)
+
+- [Next.js](https://nextjs.org)
+- [Tailwind CSS](https://tailwindcss.com)
+- [tRPC](https://trpc.io)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Prisma](https://prisma.io/)
+- [Next-Connect](https://www.npmjs.com/package/next-connect) for uploading and storing files.
+- [Nodemailer](https://nodemailer.com/) for sending mails
+- [PDFmake](https://pdfmake.org/) for generating prescriptions & bills.
+
+## Relavent Links
+
+- Website: [Link to Deployment](https://healthsake.jaideepguntupalli.com)
+
 ## Understanding File Structure:
 
     .
@@ -72,3 +92,8 @@ Some other features
     │ └── utils
     │ └── trpc.ts # <-- typesafe tRPC hooks
     └── [..]
+
+
+## License
+
+[MIT](LICENSE)
