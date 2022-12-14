@@ -6,7 +6,7 @@ claims.
 
 ## Table of contents
 
-- [HealthSake(maybe)](#healthsake)
+- [HealthSake](#healthsake)
     - [Table of contents](#table-of-contents)
     - [Overview](#overview)
         - [What is the project?](#what-is-the-project)
@@ -29,13 +29,13 @@ that facilitates the secure exchange and verification of electronic health recor
 Document Verification System: The patients will provide the documents to the healthcare professionals or organizations,
 which need to verify automatically.
 
-You can have the following types of verification in the system.
+We have the following types of verification in the system.
 
 - The patients issue verifiable documents and share them with healthcare professionals and organizations.
 - The healthcare professionals issue verifiable documents and share them with the patients.
 - Healthcare organizations issue verifiable documents and share them with the patients.
 
-Digital signatures and blockchain is used to share & verify the documents.
+Digital signatures and hasing is used to share & verify the documents.
 
 Some other features
 
@@ -48,7 +48,7 @@ Some other features
 - Ability to buy medicines and get medical claims.
 - Ability to provide documents to other users (patients/organizations).
 - Ability to automatically verify the documents.
-- Admin capabilities as mentioned above or more.
+- Admin capabilities is being able to observe logs and remove any user.
 - User-Admin approval process using a document upload.
 
 ## Built with
