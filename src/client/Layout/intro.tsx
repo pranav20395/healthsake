@@ -30,8 +30,9 @@ const IntroLayout: FC<LayoutProps> = ({ title, children }) => {
         <footer className="absolute bottom-4 right-0 w-full px-12 text-center text-xs text-gray-500 md:w-1/3">
           {" "}
           <span className="hover:cursor-help hover:text-gray-400">
-            Developed with ❤️ by Jaideep Guntupalli (2020378), Cyrus Monteiro
-            (2020368), Ayush Singhal (2020365) & Pranav Sharma (2020395)
+            Developed with ❤️ by{" "}
+            <a href="https://jaideepguntupalli.com">Jaideep Guntupalli</a>,
+            Cyrus Monteiro, Ayush Singhal & Pranav Sharma
           </span>
         </footer>
       </div>

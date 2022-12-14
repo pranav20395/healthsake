@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 26.5.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class=""><rect id="r4" width="512" height="512" x="0" y="0" rx="128" fill="url(#r5)" stroke="#FFFFFF" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect><clipPath id="clip"><use xlink:href="#r4"></use></clipPath><defs><linearGradient id="r5" gradientUnits="userSpaceOnUse" gradientTransform="rotate(180)" style="transform-origin: center center;"><stop stop-color="#C9D6FF"></stop><stop offset="1" stop-color="#596AA1"></stop></linearGradient><radialGradient id="r6" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256) rotate(90) scale(512)"><stop stop-color="white"></stop><stop offset="1" stop-color="white" stop-opacity="0"></stop></radialGradient></defs>
+
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="128" y="128" viewBox="0 0 512 512" xml:space="preserve" width="256" height="256" alignment-baseline="middle" style="color: rgb(255, 255, 255);">
 <style type="text/css">
 	.st0{fill:#545FDC;}
 </style>
@@ -9,5 +8,6 @@
 	c0,70.7-57.3,128-128,128s-128-57.3-128-128v-1.7C244,329,298.5,266.1,298.7,192v-85.3C298.6,47.8,250.9,0.1,192,0
 	c-11.8,0-21.3,9.6-21.3,21.3s9.6,21.3,21.3,21.3c35.3,0,64,28.7,64,64V192c0,58.9-47.8,106.7-106.7,106.7S42.7,250.9,42.7,192v-85.3
 	c0-35.3,28.7-64,64-64c11.8,0,21.3-9.6,21.3-21.3S118.4,0,106.7,0C47.8,0.1,0.1,47.8,0,106.7V192c0.1,74.1,54.6,137,128,147.6v1.7
-	c0,94.3,76.4,170.7,170.7,170.7s170.7-76.4,170.7-170.7v-89.3C494.8,243.1,511.9,219,512,192z"/>
+	c0,94.3,76.4,170.7,170.7,170.7s170.7-76.4,170.7-170.7v-89.3C494.8,243.1,511.9,219,512,192z"></path>
+</svg>
 </svg>
