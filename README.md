@@ -65,7 +65,7 @@ Some other features
 - [PDFmake](https://pdfmake.org/) for generating prescriptions & bills.
 
 ## Achievement:
-- Sustained Cyberattack for a week from 200+ students
+- Sustained Cyberattack for two weeks from 250+ students
 - Highest Scoring course project in the course
 
 ## Relavent Links
