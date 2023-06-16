@@ -8,6 +8,6 @@ rm /uploads/*
 
 yarn build
 
-pm2 restart fcsakev5 --update-env
+pm2 restart healthsake --update-env
 
 mkdir uploads
