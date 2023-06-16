@@ -64,6 +64,10 @@ Some other features
 - [Nodemailer](https://nodemailer.com/) for sending mails
 - [PDFmake](https://pdfmake.org/) for generating prescriptions & bills.
 
+## Achievement:
+- Sustained Cyberattack for a week from 200+ students
+- Highest Scoring course project in the course
+
 ## Relavent Links
 
 - Website: [Link to Deployment](https://healthsake.jaideepguntupalli.com)
